@@ -42,6 +42,7 @@ tests: tests-base
 
 .PHONY: install
 install: install-base
+	@cp -r kernels $(PREFIX)/
 
 .PHONY: all
 all: lib examples tests install

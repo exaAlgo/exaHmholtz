@@ -2,13 +2,17 @@
 #define _EXA_HMHOLTZ_IMPL_H_
 
 #include "exa-hmholtz.h"
+#include "exa-memory.h"
 
 struct exaHmholtz_private{
   exaHandle h;
-  exaProgram prog;
+  exaSettings s;
+  // program
+  exaProgram p;
   // kernels
   exaKernel Ax;
-  exaKernel weightedNorm2;
+  exaKernel vectorWeightedNorm2;
+  exaKernel vectorScaledAdd;
   // device vectors
   exaVector d_x,d_b,d_r;
 };

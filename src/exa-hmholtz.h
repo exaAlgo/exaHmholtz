@@ -9,16 +9,19 @@ typedef struct exaHmholtz_private *exaHmholtz;
 //
 // exaHmholtz
 //
-int exaHmholtzCreate(exaHandle h,exaHmholtz *solver);
-int exaHmholtzSetup (exaHmholtz solver);
+int exaHmholtzCreate(exaHandle h,exaSettings s,exaHmholtz *solver);
+int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h);
+int exaHmholtzSetup (exaSettings s,exaHmholtz solver);
 int exaHmholtzDestroy(exaHmholtz solver);
 //
 // vector operations
 //
+int exaVectorScaledAdd(exaScalar alpha,exaVector vec1,exaScalar beta,
+  exaVector vec2,exaHmholtz hz);
 int exaVectorWeightedNorm2(exaVector v,exaHmholtz hz);
 //
 // PCG
 //
-int exaHmholtzCG(exaVector x,exaVector f,exaScalar lambda,exaScalar tol,
-  int maxit,exaHmholtz hz);
+int exaHmholtzCG(exaVector x,exaVector f,exaVector h1,
+  exaScalar lambda,exaScalar tol,int maxit,exaHmholtz hz);
 #endif
