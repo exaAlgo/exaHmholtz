@@ -19,12 +19,27 @@ exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
   assert(size==(exaUInt)exaVectorGetSize(weights));
 
   exaHandle h; exaHmholtzGetHandle(hz,&h);
-  exaVector out; exaVectorCreate(h,size,&out);
+
+  exaUInt blockSize;
+  exaSettingsGetNative(&blockSize,"defines::p_blockSize",hz->s);
+  exaUInt nBlocks=(size+blockSize-1)/blockSize;
+
+  exaVector out; exaVectorCreate(h,nBlocks,&out);
 
   exaKernelRun(hz->vectorWeightedNorm2,getExaUInt(size),weights,vec,
     out);
 
+  exaScalar *result; exaCalloc(nBlocks,&result);
+  exaVectorRead(out,result);
+
+  exaScalar t=0;
+  for(int i=0;i<nBlocks;i++)
+    t+=result[i];
+
+  exaGop(h,&t,1,exaScalar_t,exaAddOp);
+
+  exaFree(result);
   exaDestroy(out);
 
-  return 0;
+  return t;
 }
