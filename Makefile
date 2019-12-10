@@ -32,10 +32,10 @@ libname  = exaHmholtz
 lib: lib-base
 
 .PHONY: examples
-examples: examples-base
+examples: install examples-base
 
 .PHONY: tests
-tests: tests-base
+tests: install tests-base
 	@cp $(EXADIR)/share/run-tests.sh $(BUILDDIR)/$(TESTSDIR)
 	@cd $(BUILDDIR)/$(TESTSDIR) && ./run-tests.sh
 
