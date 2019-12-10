@@ -27,6 +27,8 @@ int exaHmholtzSetup(exaSettings s,exaHmholtz solver){
 
   exaProgramCreate(h,fname,s,&solver->p);
   exaKernelCreate(solver->p,"scaledAdd",&solver->vectorScaledAdd);
+  exaKernelCreate(solver->p,"weightedNorm2",
+    &solver->vectorWeightedNorm2);
   exaProgramFree(solver->p);
 
   return 0;
@@ -49,6 +51,7 @@ int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h){
 
 int exaHmholtzDestroy(exaHmholtz solver){
   exaDestroy(solver->vectorScaledAdd);
+  exaDestroy(solver->vectorWeightedNorm2);
 
   exaFree(solver);
 

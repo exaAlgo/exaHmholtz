@@ -18,7 +18,6 @@ PREFIX ?= $(HOME)/local/exaHmholtz
 ### Meta info about the package ###
 SRCDIR      = src
 BUILDDIR    = build
-DEPDIR      = .deps
 EXAMPLESDIR = examples
 TESTSDIR    = tests
 

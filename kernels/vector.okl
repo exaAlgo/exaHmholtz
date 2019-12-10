@@ -4,9 +4,28 @@
                       const exaScalar beta,
                       @restrict exaScalar *y)
 {
-  for(exaUInt n=0;n<N;++n;@tile(256,@outer,@inner)){
+  for(exaUInt n=0;n<N;n++;@tile(256,@outer,@inner)){
     if(n<N){
       y[n] = alpha*x[n] + beta*y[n];
     }
+  }
+}
+
+@kernel void weightedNorm2(const exaUInt N,
+                           @restrict const exaScalar *w,
+                           @restrict const exaScalar *x,
+                           @restrict exaScalar *out)
+{
+  for(exaUInt b=0;b<(N+p_blockSize-1)/p_blockSize;b++;@outer(0)){
+    @shared volatile exaScalar s_out[p_blockSize];
+
+    for(exaUInt t=0;t<p_blockSize;t++;@inner(0)){
+      const exaUInt id   =t+b*p_blockSize;
+      const exaScalar xid=(id<N)?x[id]:0.0;
+      const exaScalar wid=(id<N)?w[id]:0.0;
+      s_out[t]=wid*xid*xid;
+    }
+
+    @barrier("local");
   }
 }
