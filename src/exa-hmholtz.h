@@ -23,8 +23,9 @@ exaScalar exaVectorWeightedInnerProduct2(exaVector weights,
 exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
   exaHmholtz hz);
 //
-// PCG
+// CG and PCG
 //
-int exaHmholtzCG(exaVector x,exaVector f,exaVector h1,
-  exaScalar lambda,exaScalar tol,int maxit,exaHmholtz hz);
+int exaHmholtzCG(exaVector x,
+  int (*getAx)(exaVector,exaVector,exaHmholtz),exaVector b,
+  exaVector weights,exaScalar tol,int maxit,exaHmholtz hz);
 #endif

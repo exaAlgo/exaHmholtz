@@ -4,6 +4,8 @@
 #include "exa-hmholtz.h"
 #include "exa-memory.h"
 
+#define max(a,b) ((a)>(b)) ? (a) : (b)
+
 struct exaHmholtz_private{
   exaHandle h;
   exaSettings s;
@@ -15,7 +17,7 @@ struct exaHmholtz_private{
   exaKernel vectorWeightedInnerProduct2;
   exaKernel vectorScaledAdd;
   // device vectors
-  exaVector tmp;
+  exaVector tmp_r,tmp_p,tmp_z,tmp_Ap,tmp_Ax;
 };
 
 #endif

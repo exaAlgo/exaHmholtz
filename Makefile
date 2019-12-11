@@ -36,6 +36,7 @@ examples: install examples-base
 
 .PHONY: tests
 tests: install tests-base
+	@cp $(TESTSDIR)/t[0-9][0-9]-*.[^c]* $(BUILDDIR)/$(TESTSDIR)/
 	@cp $(EXADIR)/share/run-tests.sh $(BUILDDIR)/$(TESTSDIR)
 	@cd $(BUILDDIR)/$(TESTSDIR) && ./run-tests.sh
 
