@@ -16,8 +16,10 @@ int exaHmholtzDestroy(exaHmholtz solver);
 //
 // vector operations
 //
-int exaVectorScaledAdd(exaScalar alpha,exaVector vec1,exaScalar beta,
-  exaVector vec2,exaHmholtz hz);
+int exaVectorScaledAdd(exaScalar alpha,exaVector x,exaScalar beta,
+  exaVector y,exaHmholtz hz);
+exaScalar exaVectorWeightedInnerProduct2(exaVector weights,
+  exaVector x,exaVector y,exaHmholtz hz);
 exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
   exaHmholtz hz);
 //

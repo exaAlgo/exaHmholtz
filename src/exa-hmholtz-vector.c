@@ -12,22 +12,26 @@ int exaVectorScaledAdd(exaScalar alpha,exaVector vec1,exaScalar beta,
   return 0;
 }
 
-exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
-  exaHmholtz hz)
+exaScalar exaVectorWeightedInnerProduct2(exaVector weights,
+  exaVector x,exaVector y,exaHmholtz hz)
 {
-  exaUInt size=exaVectorGetSize(vec);
+  exaUInt size=exaVectorGetSize(x);
+  assert(size==(exaUInt)exaVectorGetSize(y));
   assert(size==(exaUInt)exaVectorGetSize(weights));
 
   exaHandle h; exaHmholtzGetHandle(hz,&h);
 
   exaUInt blockSize;
-  exaSettingsGetNative(&blockSize,"defines::p_blockSize",hz->s);
+  int err=exaSettingsGet(&blockSize,"defines::p_blockSize",hz->s);
+  if(err!=0){
+    fprintf(stderr,"Could not find blockSize.\n");
+    exit(0);
+  }
   exaUInt nBlocks=(size+blockSize-1)/blockSize;
-
   exaVector out; exaVectorCreate(h,nBlocks,&out);
 
-  exaKernelRun(hz->vectorWeightedNorm2,getExaUInt(size),weights,vec,
-    out);
+  exaKernelRun(hz->vectorWeightedInnerProduct2,getExaUInt(size),
+    weights,x,y,out);
 
   exaScalar *result; exaCalloc(nBlocks,&result);
   exaVectorRead(out,result);
@@ -42,4 +46,10 @@ exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
   exaDestroy(out);
 
   return t;
+}
+
+exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
+  exaHmholtz hz)
+{
+  return exaVectorWeightedInnerProduct2(weights,vec,vec,hz);
 }
