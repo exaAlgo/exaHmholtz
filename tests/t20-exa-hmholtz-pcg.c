@@ -32,13 +32,6 @@ int main(int argc,char *argv[])
   exaProgram p; exaProgramCreate(h,argv[0],s,&p);
   exaKernelCreate(p,"Ax",&kernelAx);
 
-  // set weights to all ones
-  exaVector one; exaVectorCreate(h,size,&one);
-  exaScalar *in; exaMalloc(size,&in);
-  exaUInt i;
-  for(i=0;i<size;i++) in[i]=1.0;
-  exaVectorWrite(one,in);
-
   exaScalar *xx; exaCalloc(size,&xx); populate(xx,size);
 
   // create matrix A - make sure it is SPD
@@ -56,13 +49,21 @@ int main(int argc,char *argv[])
 
   // set RHS
   exaScalar *Axx; exaCalloc(size,&Axx); matVec(A,xx,size,Axx);
+
+  exaScalar normB=0;
+  for(int i=0;i<size;i++) normB+=Axx[i]*Axx[i];
+  //printf("normB (host) = %.2e\n",normB);
+
   exaVector b; exaVectorCreate(h,size,&b); exaVectorWrite(b,Axx);
 
   // Call CG with zero initial guess
+  exaUInt i;
+  exaScalar *in; exaCalloc(size,&in);
   exaVector x; exaVectorCreate(h,size,&x);
   for(i=0;i<size;i++) in[i]=0.0;
   exaVectorWrite(x,in);
-  int nIter=exaHmholtzGeneralCG(x,calcAx,b,one,1e-9,100,hmhz);
+
+  int nIter=exaHmholtzGeneralCG(x,calcAx,b,1e-8,100,hmhz);
 
   // nIter <= size should hold true
   assert(nIter<=size);
@@ -70,11 +71,11 @@ int main(int argc,char *argv[])
   // compare answer
   exaScalar *out; exaCalloc(size,&out); exaVectorRead(x,out);
   for(i=0;i<size;i++)
-    if(fabs(out[i]-xx[i])>1e-8)
+    if(fabs(out[i]-xx[i])>1e-7)
       fprintf(stderr,"Error: %lf != %lf\n",out[i],xx[i]);
 
   exaFree(xx); exaFree(A); exaFree(Axx); exaFree(in); exaFree(out);
-  exaDestroy(Amatrix); exaDestroy(x); exaDestroy(b); exaDestroy(one);
+  exaDestroy(Amatrix); exaDestroy(x); exaDestroy(b);
   exaDestroy(s); exaDestroy(kernelAx);
 
   exaHmholtzDestroy(hmhz);

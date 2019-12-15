@@ -29,7 +29,7 @@ exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
 //
 int exaHmholtzGeneralCG(exaVector x,
   int (*getAx)(exaVector,exaVector,exaHmholtz),exaVector b,
-  exaVector weights,exaScalar tol,int maxit,exaHmholtz hz);
+  exaScalar tol,int maxit,exaHmholtz hz);
 int exaHmholtzCG(exaVector x,exaVector b,exaScalar tol,int maxit,
   exaHmholtz hz);
 #endif

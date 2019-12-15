@@ -2,11 +2,10 @@
 
 int exaHmholtzGeneralCG(exaVector x,
   int (*getAx)(exaVector,exaVector,exaHmholtz),exaVector b,
-  exaVector weights,exaScalar tol,int maxit,exaHmholtz hz)
+  exaScalar tol,int maxit,exaHmholtz hz)
 {
   exaInt size=exaVectorGetSize(x);
   assert(size==exaVectorGetSize(b));
-  assert(size==exaVectorGetSize(weights));
 
   exaVector r =hz->tmp_1;
   exaVector p =hz->tmp_2;
@@ -19,8 +18,9 @@ int exaHmholtzGeneralCG(exaVector x,
   exaVectorCreate(h,size,&Ap);
   exaVectorCreate(h,size,&Ax);
 
-  exaScalar normB=exaVectorWeightedNorm2(weights,b,hz);
+  exaScalar normB=exaVectorInnerProduct2(b,b,hz);
   exaScalar TOL=max(tol*tol*normB,tol*tol);
+  //printf("normB=%.2e TOL=%.2e\n",normB,TOL);
 
   exaVectorScaledAdd(1.0,b,0.0,r,hz);
   exaVectorScaledAdd(1.0,b,0.0,p,hz);
@@ -33,14 +33,14 @@ int exaHmholtzGeneralCG(exaVector x,
     //Calculate Ap=A*p
     getAx(p,Ap,hz);
 
-    exaScalar pAp=exaVectorWeightedInnerProduct2(weights,p,Ap,hz);
+    exaScalar pAp=exaVectorInnerProduct2(p,Ap,hz);
     alpha=rdotr/pAp;
 
     exaVectorScaledAdd(alpha     ,p ,1.0,x,hz);
     exaVectorScaledAdd(-1.0*alpha,Ap,1.0,r,hz);
 
     rdotr0=rdotr;
-    rdotr=exaVectorWeightedNorm2(weights,r,hz);
+    rdotr=exaVectorInnerProduct2(r,r,hz);
     beta=rdotr/rdotr0;
 
     exaVectorScaledAdd(1.0,r,beta,p,hz);
