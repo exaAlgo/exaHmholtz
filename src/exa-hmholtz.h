@@ -18,6 +18,8 @@ int exaHmholtzDestroy(exaHmholtz solver);
 //
 int exaVectorScaledAdd(exaScalar alpha,exaVector x,exaScalar beta,
   exaVector y,exaHmholtz hz);
+exaScalar exaVectorInnerProduct2(exaVector x,exaVector y,
+  exaHmholtz hz);
 exaScalar exaVectorWeightedInnerProduct2(exaVector weights,
   exaVector x,exaVector y,exaHmholtz hz);
 exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
@@ -25,7 +27,9 @@ exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
 //
 // CG and PCG
 //
-int exaHmholtzCG(exaVector x,
+int exaHmholtzGeneralCG(exaVector x,
   int (*getAx)(exaVector,exaVector,exaHmholtz),exaVector b,
   exaVector weights,exaScalar tol,int maxit,exaHmholtz hz);
+int exaHmholtzCG(exaVector x,exaVector b,exaScalar tol,int maxit,
+  exaHmholtz hz);
 #endif
