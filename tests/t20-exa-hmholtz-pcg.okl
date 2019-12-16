@@ -1,15 +1,15 @@
 @kernel void Ax(const exaUInt N,
-                @restrict const exaScalar *q,
                 @restrict const exaScalar *A,
+                @restrict const exaScalar *q,
                 @restrict exaScalar *Aq)
 {
   for(exaUInt n=0;n<N;n++;@tile(32,@outer,@inner)){
-    exaScalar out=0;
-
-    exaUInt start=N*n;
-    for(exaUInt m=0;m<N;m++){
-      out+=A[start+m]*q[m];
+    if(n<N){
+      exaUInt start=N*n;
+      Aq[n]=0;
+      for(exaUInt m=0;m<N;m++){
+        Aq[n]+=A[start+m]*q[m];
+      }
     }
-    Aq[n]=out;
   }
 }

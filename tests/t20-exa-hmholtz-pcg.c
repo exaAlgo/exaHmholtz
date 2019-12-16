@@ -49,11 +49,6 @@ int main(int argc,char *argv[])
 
   // set RHS
   exaScalar *Axx; exaCalloc(size,&Axx); matVec(A,xx,size,Axx);
-
-  exaScalar normB=0;
-  for(int i=0;i<size;i++) normB+=Axx[i]*Axx[i];
-  //printf("normB (host) = %.2e\n",normB);
-
   exaVector b; exaVectorCreate(h,size,&b); exaVectorWrite(b,Axx);
 
   // Call CG with zero initial guess
