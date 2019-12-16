@@ -32,13 +32,7 @@ int main(int argc,char *argv[])
   exaProgram p; exaProgramCreate(h,argv[0],s,&p);
   exaKernelCreate(p,"Ax",&kernelAx);
 
-  // set weights to all ones
-  exaVector one; exaVectorCreate(h,size,&one);
-  exaScalar *in; exaMalloc(size,&in);
-  exaUInt i;
-  for(i=0;i<size;i++) in[i]=1.0;
-  exaVectorWrite(one,in);
-
+  // Set answer
   exaScalar *xx; exaCalloc(size,&xx); populate(xx,size);
 
   // create matrix A - make sure it is SPD
@@ -50,7 +44,7 @@ int main(int argc,char *argv[])
       A[i*size+j]=A[j*size+i]=0.5*s;
       sum+=s;
     }
-    A[i*size+i]+=sum;
+    A[i*size+i]+=100+fabs(sum);
   }
   exaVectorCreate(h,size*size,&Amatrix); exaVectorWrite(Amatrix,A);
 
@@ -60,9 +54,11 @@ int main(int argc,char *argv[])
 
   // Call CG with zero initial guess
   exaVector x; exaVectorCreate(h,size,&x);
+  exaScalar *in; exaMalloc(size,&in);
+  exaUInt i;
   for(i=0;i<size;i++) in[i]=0.0;
   exaVectorWrite(x,in);
-  int nIter=exaHmholtzCG(x,calcAx,b,one,1e-9,100,hmhz);
+  int nIter=exaHmholtzCGGeneral(x,calcAx,b,1e-8,100,0,hmhz);
 
   // nIter <= size should hold true
   assert(nIter<=size);
@@ -70,11 +66,11 @@ int main(int argc,char *argv[])
   // compare answer
   exaScalar *out; exaCalloc(size,&out); exaVectorRead(x,out);
   for(i=0;i<size;i++)
-    if(fabs(out[i]-xx[i])>1e-8)
+    if(fabs(out[i]-xx[i])>1e-7)
       fprintf(stderr,"Error: %lf != %lf\n",out[i],xx[i]);
 
   exaFree(xx); exaFree(A); exaFree(Axx); exaFree(in); exaFree(out);
-  exaDestroy(Amatrix); exaDestroy(x); exaDestroy(b); exaDestroy(one);
+  exaDestroy(Amatrix); exaDestroy(x); exaDestroy(b);
   exaDestroy(s); exaDestroy(kernelAx);
 
   exaHmholtzDestroy(hmhz);

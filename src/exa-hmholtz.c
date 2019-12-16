@@ -29,6 +29,8 @@ int exaHmholtzSetup(exaSettings s,exaHmholtz solver){
   exaKernelCreate(solver->p,"scaledAdd",&solver->vectorScaledAdd);
   exaKernelCreate(solver->p,"weightedInnerProduct2",
     &solver->vectorWeightedInnerProduct2);
+  exaKernelCreate(solver->p,"innerProduct2",
+    &solver->vectorInnerProduct2);
   exaKernelCreate(solver->p,"weightedNorm2",
     &solver->vectorWeightedNorm2);
   exaProgramFree(solver->p);
@@ -54,6 +56,7 @@ int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h){
 int exaHmholtzDestroy(exaHmholtz solver){
   exaDestroy(solver->vectorScaledAdd);
   exaDestroy(solver->vectorWeightedInnerProduct2);
+  exaDestroy(solver->vectorInnerProduct2);
   exaDestroy(solver->vectorWeightedNorm2);
 
   exaFree(solver);
