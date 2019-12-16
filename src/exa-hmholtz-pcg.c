@@ -28,7 +28,7 @@ int exaHmholtzGeneralCG(exaVector x,
   exaScalar alpha,beta,rdotr0;
 
   int nIter=0;
-  while(nIter<maxit && rdotr>tol*tol){
+  while(nIter<maxit && rdotr>TOL){
     //Calculate Ap=A*p
     getAx(p,Ap,hz);
 

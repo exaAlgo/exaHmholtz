@@ -58,7 +58,7 @@ int main(int argc,char *argv[])
   for(i=0;i<size;i++) in[i]=0.0;
   exaVectorWrite(x,in);
 
-  int nIter=exaHmholtzGeneralCG(x,calcAx,b,1e-8,100,hmhz);
+  int nIter=exaHmholtzGeneralCG(x,calcAx,b,1e-6,100,0,hmhz);
 
   // nIter <= size should hold true
   assert(nIter<=size);
