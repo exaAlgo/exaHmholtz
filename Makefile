@@ -16,10 +16,11 @@ DEBUG ?= 1
 PREFIX ?= $(HOME)/local/exaHmholtz
 
 ### Meta info about the package ###
-SRCDIR      = src
-BUILDDIR    = build
-EXAMPLESDIR = examples
-TESTSDIR    = tests
+SRCDIR       = src
+BUILDDIR     = build
+EXAMPLESDIR  = examples
+INTERFACESDIR= interfaces
+TESTSDIR     = tests
 
 LDFLAGS += -L$(EXADIR)/lib -lexa
 incflags = -I$(EXADIR)/include
@@ -28,8 +29,19 @@ libname  = exaHmholtz
 ### Include template makefile ###
 -include $(EXADIR)/share/exa-base.mk
 
+interfaces.src    = $(wildcard $(INTERFACESDIR)/nek/*.c)
+interfaces.obj    = $(patsubst $(INTERFACESDIR)/nek/%.c,\
+  $(BUILDDIR)/interfaces/nek/%.o,$(interfaces.src))
+obj += $(interfaces.obj)
+
+.PHONY: interfaces
+interfaces: $(interfaces.obj)
+
+$(BUILDDIR)/interfaces/nek/%.o: $(INTERFACESDIR)/nek/%.c
+	$(compile.c) -I$(INTERFACESDIR)/nek -c $< -o $@
+
 .PHONY: lib
-lib: lib-base
+lib: interfaces lib-base
 
 .PHONY: examples
 examples: install examples-base
@@ -41,8 +53,12 @@ tests: install tests-base
 	@cd $(BUILDDIR)/$(TESTSDIR) && ./run-tests.sh
 
 .PHONY: install
-install: install-base
+install: lib install-base
 	@cp -r kernels $(PREFIX)/
+	@mkdir -p $(PREFIX)/interfaces/nek
+	@cp -r interfaces/nek/share $(PREFIX)/interfaces/nek
 
 .PHONY: all
-all: lib examples tests install
+all: lib examples tests install interfaces
+
+$(shell mkdir -p $(BUILDDIR)/$(INTERFACESDIR)/nek)
