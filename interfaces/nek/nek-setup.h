@@ -8,6 +8,7 @@
 #include <mpi.h>
 
 #include <exa.h>
+#include <exa-hmholtz.h>
 #include <nek.h>
 
 typedef struct {
@@ -59,9 +60,9 @@ typedef struct {
 
 extern nekData_private nekData;
 
-int buildNekCase(exaSettings s);
+int buildNekCase(const char *casename,exaHmholtz hz);
 //int buildNekCase(const char *casename,const char *nek5000_dir,
 //  int ldimt,int N,int np);
-int nekSetup(exaHandle h,exaSettings options);
+int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz);
 
 #endif

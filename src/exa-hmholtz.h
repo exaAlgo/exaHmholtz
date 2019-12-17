@@ -6,11 +6,13 @@
 // Pointer types in exaHmholtz
 //
 typedef struct exaHmholtz_private *exaHmholtz;
+typedef struct exaMesh_private *exaMesh;
 //
 // exaHmholtz
 //
 int exaHmholtzCreate(exaHandle h,exaSettings s,exaHmholtz *solver);
 int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h);
+int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s);
 int exaHmholtzSetup (exaSettings s,exaHmholtz solver);
 int exaHmholtzDestroy(exaHmholtz solver);
 //

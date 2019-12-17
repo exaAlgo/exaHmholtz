@@ -1,22 +1,22 @@
-#include "nek-setup.h"
+#include <nek-setup.h>
+#include <exa-memory.h>
 
 #include <stdlib.h>
 #include <unistd.h>
 
 nekData_private nekData;
+char *cache_dir;
+char *nek5000_dir;
+char *exa_dir;
 
-void mkSIZE(int lx1,int lxd,exaInt lelt,exaLong lelg,int ldim,
-  int lpmin,int ldimt)
+void mkSIZE(exaHandle h,int lx1,int lxd,exaInt lelt,exaLong lelg,
+  int ldim,int lpmin,int ldimt)
 {
-  char line[BUFSIZ];
   char fname[BUFSIZ];
   char cmd[BUFSIZ];
 
-  const char *cache_dir = getenv("NEKRS_CACHE_DIR");
-  const char *nekrs_nek5000_dir = getenv("EXA_NEK5000_DIR");
-
   // Read and generate the new size file.
-  sprintf(fname,"%s/core/SIZE.template", nekrs_nek5000_dir);
+  sprintf(fname,"%s/core/SIZE.template",nek5000_dir);
   FILE *fp = fopen(fname,"r");
   char *sizeFile;
   if (fp) {
@@ -31,10 +31,11 @@ void mkSIZE(int lx1,int lxd,exaInt lelt,exaLong lelg,int ldim,
     }
   } else {
     fprintf(stderr,"Error opening %s/core/SIZE.template!\n",
-      nekrs_nek5000_dir);
+      nek5000_dir);
     exit(EXIT_FAILURE);
   }
 
+  char *line; exaCalloc(BUFSIZ,&line);
   int count = 0;
   while(fgets(line,BUFSIZ,fp)!=NULL){
     if(strstr(line, "parameter (lx1=") != NULL) {
@@ -68,7 +69,7 @@ void mkSIZE(int lx1,int lxd,exaInt lelt,exaLong lelg,int ldim,
 
   // read size if exists
   sprintf(fname,"%s/SIZE",cache_dir);
-  fp=fopen(fname,"r"); 
+  fp=fopen(fname,"r");
 
   int writeSize=0,oldVal;
   size_t len;
@@ -76,11 +77,11 @@ void mkSIZE(int lx1,int lxd,exaInt lelt,exaLong lelg,int ldim,
     while(getline((char**)&line,&len,fp)>0) {
       if(strstr(line,"lelg=")!=NULL) {
           sscanf(line,"%*[^=]=%d",&oldVal);
-          if(oldVal<lelg) writeSize = 1; 
+          if(oldVal<lelg) writeSize = 1;
       }
       if(strstr(line,"lelt=")!=NULL) {
           sscanf(line,"%*[^=]=%d",&oldVal);
-          if(oldVal<lelt) writeSize = 1; 
+          if(oldVal<lelt) writeSize = 1;
       }
       if(strstr(line,"lx1=")!=NULL) {
           sscanf(line,"%*[^=]=%d",&oldVal);
@@ -91,70 +92,95 @@ void mkSIZE(int lx1,int lxd,exaInt lelt,exaLong lelg,int ldim,
           if(oldVal<ldimt) writeSize = 1;
       }
     }
-  }
-  fclose(fp);
+    fclose(fp);
+  } else writeSize=1;
 
   if(writeSize) {
-    fp = fopen(fname,"w");
+    exaDebug(h,"Writing new SIZE file: %s/SIZE\n",cache_dir);
+    fp = fopen(fname,"w+");
     fputs(sizeFile,fp);
     fclose(fp);
     free(sizeFile);
   } else {
-    printf("using existing SIZE file %s/SIZE\n", cache_dir);
+    exaDebug(h,"Using existing SIZE file: %s/SIZE\n",cache_dir);
   }
-
-  fflush(stdout);
 }
 
-int buildNekCase(exaSettings s){
-  printf("building nek ... "); fflush(stdout);
+int buildNekCase(const char *casename,exaHmholtz hz){
+  exaHandle h;
+  exaHmholtzGetHandle(hz,&h);
+
+  exaDebug(h,"Building Nek5000 case: %s\n",casename);
+
+  exaSettings s;
+  exaHmholtzGetSettings(hz,&s);
+
+  exa_dir=getenv("EXA_DIR");
+  if(exa_dir==NULL)
+    exaSettingsGet(&exa_dir,"exa:install_dir",s);
+
+  nek5000_dir=getenv("EXA_NEK5000_DIR");
+  if(nek5000_dir==NULL)
+    exaSettingsGet(&nek5000_dir,"nek5000::install_dir",s);
+
+  char *last=strrchr(casename,'/');
+  exaCalloc(last-casename+10,&cache_dir);
+  strncpy(cache_dir,casename,last-casename+1);
+  strcpy(cache_dir+strlen(cache_dir),".cache");
+  exaDebug(h,"cache dir: %s\n",cache_dir);
 
   char buf[BUFSIZ];
-  //TODO
-  const char *casename;
-  const char *cache_dir;
-  const char *nek5000_dir;
-  const char *exa_dir;
+  sprintf(buf,"mkdir -p %s\n",cache_dir);
+  int retval=system(buf);
+  if(retval!=0){
+    fprintf(stderr,"Can not create cache dir: %s\n",cache_dir);
+    exit(EXIT_FAILURE);;
+  }
 
   FILE *fp;
-  int retval;
-
   sprintf(buf,"%s.re2",casename);
   fp=fopen(buf,"r");
   if(!fp){
-    printf("\nERROR: Cannot find %s!\n", buf);
+    fprintf(stderr,"Error: Cannot find %s.re2\n",buf);
     exit(EXIT_FAILURE);;
   }
-  fgets(buf, 80, fp);
+  fgets(buf,80,fp);
   fclose(fp);
 
-  // TODO set from settings
-  int N,np,ldimt;
+  // TODO: set from settings
+  int N=8,np=1,ldimt=1;
 
   char ver[10];
-  int nelgv, nelgt, ndim;
+  int nelgv,nelgt,ndim;
   sscanf(buf,"%5s %9d %1d %9d",ver,&nelgt,&ndim,&nelgv);
   int lelt=nelgt/np+2;
-  mkSIZE(N+1,1,lelt,nelgt,ndim,np,ldimt);
+  mkSIZE(h,N+1,1,lelt,nelgt,ndim,np,ldimt);
 
   // Copy case.usr file to cache_dir
   sprintf(buf,"%s.usr",casename);
   if(access(buf,F_OK)!=-1){
+    exaDebug(h,"Using case file: %s.usr\n",casename);
     sprintf(buf,"cp -pf %s.usr %s/ >build.log 2>&1",casename,
       cache_dir);
   } else {
+    exaDebug(h,"Using zero.usr file from: %s/core\n",nek5000_dir);
     sprintf(buf,"cp -pf %s/core/zero.usr %s/%s.usr >>build.log 2>&1",
       nek5000_dir,cache_dir,casename);
   }
   retval=system(buf);
-  if (retval) exit(EXIT_FAILURE);;
+  if(retval){
+    fprintf(stderr,"Error: Cannot find a case file\n");
+    exit(EXIT_FAILURE);
+  }
 
+  exaFree(cache_dir);
+#if 0
   // Copy Nek5000/core from install_dir to cache_dir
   sprintf(buf,"cp -pr %s %s/",nek5000_dir,cache_dir);
   retval = system(buf);
   if (retval) exit(EXIT_FAILURE);;
 
-  //TODO: Fix hardwired compiler flags 
+  //TODO: Fix hardwired compiler flags
   const char *fc;
   const char *cc;
   const char *fflags;
@@ -177,24 +203,25 @@ int buildNekCase(exaSettings s){
   retval = system(buf);
   if (retval) exit(EXIT_FAILURE);;
 
-  printf("done\n\n"); 
+  printf("done\n\n");
   fflush(stdout);
   sync();
   return 0;
+#endif
 }
 
-int nekSetup(exaHandle h,exaSettings s) {
-  //TODO
-  MPI_Comm c=exaGetMPIComm(h);
-  MPI_Fint nek_comm = MPI_Comm_c2f(c);
+int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz) {
+  exaHandle h;
+  exaHmholtzGetHandle(hz,&h);
 
-  //TODO: get this from settings
-  const char *casename;
+  MPI_Comm c=exaGetMPIComm(h);
+  MPI_Fint nek_comm=MPI_Comm_c2f(c);
 
   //TODO: Build nek case here
-  int rank; MPI_Comm_rank(c,&rank);
-  if(rank==0) buildNekCase(s);
+  int rank=exaRank(h);
+  if(rank==0) buildNekCase(casename,hz);
 
+#if 0
   //TODO read from settings
   int nscal=1;
 
@@ -215,7 +242,7 @@ int nekSetup(exaHandle h,exaSettings s) {
   nekData.nx1 =  *(int *) nek_ptr("nx1");
 
   nekData.vx = (double *) nek_ptr("vx");
-  nekData.vy = (double *) nek_ptr("vy"); 
+  nekData.vy = (double *) nek_ptr("vy");
   nekData.vz = (double *) nek_ptr("vz");
   nekData.pr = (double *) nek_ptr("pr");
   nekData.t  = (double *) nek_ptr("t");
@@ -224,14 +251,14 @@ int nekSetup(exaHandle h,exaSettings s) {
   nekData.ifgetp = (int *) nek_ptr("ifgetp");
 
   nekData.unx = (double *) nek_ptr("unx");
-  nekData.uny = (double *) nek_ptr("uny"); 
+  nekData.uny = (double *) nek_ptr("uny");
   nekData.unz = (double *) nek_ptr("unz");
- 
+
   nekData.xm1 = (double *) nek_ptr("xm1");
-  nekData.ym1 = (double *) nek_ptr("ym1"); 
+  nekData.ym1 = (double *) nek_ptr("ym1");
   nekData.zm1 = (double *) nek_ptr("zm1");
   nekData.xc = (double *) nek_ptr("xc");
-  nekData.yc = (double *) nek_ptr("yc"); 
+  nekData.yc = (double *) nek_ptr("yc");
   nekData.zc = (double *) nek_ptr("zc");
 
   nekData.ngv = *(long long *) nek_ptr("ngv");
@@ -245,4 +272,5 @@ int nekSetup(exaHandle h,exaSettings s) {
   nekData.comm = MPI_Comm_f2c(*(int *) nek_ptr("nekcomm"));
 
   return 0;
+#endif
 }

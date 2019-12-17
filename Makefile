@@ -23,7 +23,7 @@ INTERFACESDIR= interfaces
 TESTSDIR     = tests
 
 LDFLAGS += -L$(EXADIR)/lib -lexa
-incflags = -I$(EXADIR)/include
+incflags = -I$(EXADIR)/include -I$(INTERFACESDIR)/nek
 libname  = exaHmholtz
 
 ### Include template makefile ###
@@ -57,6 +57,7 @@ install: lib install-base
 	@cp -r kernels $(PREFIX)/
 	@mkdir -p $(PREFIX)/interfaces/nek
 	@cp -r interfaces/nek/share $(PREFIX)/interfaces/nek
+	@cp interfaces/nek/*.h $(PREFIX)/include/
 
 .PHONY: all
 all: lib examples tests install interfaces

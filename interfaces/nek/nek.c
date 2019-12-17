@@ -3,14 +3,14 @@
 static void (*usrdat_ptr)(void);
 static void (*usrdat2_ptr)(void);
 static void (*usrdat3_ptr)(void);
-static void (*userchk_ptr)(void); 
-static void (*uservp_ptr)(void); 
-static void (*userf_ptr)(void); 
-static void (*userq_ptr)(void); 
-static void (*userbc_ptr)(void); 
-static void (*useric_ptr)(void); 
-static void (*userqtl_ptr)(void); 
-static void (*usrsetvert_ptr)(void); 
+static void (*userchk_ptr)(void);
+static void (*uservp_ptr)(void);
+static void (*userf_ptr)(void);
+static void (*userq_ptr)(void);
+static void (*userbc_ptr)(void);
+static void (*useric_ptr)(void);
+static void (*userqtl_ptr)(void);
+static void (*usrsetvert_ptr)(void);
 
 static void (*nek_ptr_ptr)(void **, char *, int*);
 static void (*nek_outfld_ptr)(void);
@@ -111,7 +111,7 @@ void nek_restart(char *str,int len){
 }
 
 int nek_nbid(void){
-  return (*nek_nbid_ptr)(); 
+  return (*nek_nbid_ptr)();
 }
 
 DEFINE_USER_FUNC(usrdat)
@@ -153,7 +153,7 @@ void set_function_handles(const char *session_in,int verbose) {
   dlerror();
 
 #define fname(s) (strcpy(func,(s)), strcat(func, us), func)
- 
+
   usrdat_ptr = (void (*)(void)) dlsym(handle, fname("usrdat"));
   check_error(dlerror());
   usrdat2_ptr = (void (*)(void)) dlsym(handle, fname("usrdat2"));

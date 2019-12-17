@@ -21,4 +21,15 @@ struct exaHmholtz_private{
   exaVector tmp_1,tmp_2,tmp_3,tmp_4,tmp_5;
 };
 
+struct exaMesh_private{
+  int N;
+  int lx1;
+  int ndof;
+  exaScalar *xc,*yc,*zc;
+  exaScalar *geom;
+  exaScalar *jacobians;
+  exaScalar *D,*Dt;
+  exaScalar *globalIds;
+};
+
 #endif
