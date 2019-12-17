@@ -22,14 +22,22 @@ struct exaHmholtz_private{
 };
 
 struct exaMesh_private{
-  int N;
-  int lx1;
-  int ndof;
-  exaScalar *xc,*yc,*zc;
+  int ndim,nx1;
+  exaInt nelt;
+  exaInt nelv;
+  exaInt lelt;
+
+  exaScalar *xc ,*yc ,*zc;
+  exaScalar *xm1,*ym1,*zm1;
+
+  exaLong *glo_num;
+
+  char *cbc;
+  int *boundaryID;
+
   exaScalar *geom;
   exaScalar *jacobians;
   exaScalar *D,*Dt;
-  exaScalar *globalIds;
 };
 
 #endif

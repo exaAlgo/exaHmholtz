@@ -132,12 +132,10 @@ void check_error(char *error) {
   }
 }
 
-void set_function_handles(const char *session_in,int verbose) {
+void set_function_handles(const char *cwd,const char *session_in,int verbose) {
   // load lib{session_in}.so
   char lib_session[BUFSIZ], *error;
-
-  const char *cache_dir = getenv("NEKRS_CACHE_DIR");
-  sprintf(lib_session, "%s/lib%s.so", cache_dir, session_in);
+  sprintf(lib_session, "%s/lib%s.so",cwd,session_in);
 
   void *handle = dlopen(lib_session,RTLD_NOW|RTLD_GLOBAL);
   if(!handle) {
@@ -231,10 +229,10 @@ int nek_bcmap(int bid, int ifld) {
   return (*nek_bcmap_ptr)(&bid, &ifld);
 }
 
-void nek_interface_init(MPI_Fint nek_comm,char *cwd,char *casename,
-  int nscal)
+void nek_interface_init(MPI_Fint nek_comm,char *cwd,char *cache_dir,
+  char *casename,int nscal)
 {
-  set_function_handles(casename,0);
+  set_function_handles(cache_dir,casename,0);
   (*nek_setup_ptr)(&nek_comm,cwd,casename,&nscal,strlen(cwd),
     strlen(casename));
 }

@@ -38,8 +38,9 @@ int   nek_nbid(void);
 void  nek_get_coarse_galerkin(double *a,double lambda,int nx1,
   int nxc,int ndim, int nelv);
 void  nek_restart(char *str,int len);
-void  nek_interface_init(MPI_Fint nek_comm,char *cwd,
-  char *casename,int nscal);
 void  nek_setics(void);
+
+void  nek_interface_init(MPI_Fint nek_comm,char *cwd,char *cache_dir,
+  char *casename,int nscal);
 
 #endif

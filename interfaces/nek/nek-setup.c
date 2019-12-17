@@ -1,13 +1,11 @@
 #include <nek-setup.h>
-#include <exa-memory.h>
 
 #include <stdlib.h>
 #include <unistd.h>
 
-nekData_private nekData;
-char *case_name;
-char *cache_dir;
-char *case_dir;
+char case_name[BUFSIZ];
+char cache_dir[BUFSIZ];
+char case_dir [BUFSIZ];
 char *nek5000_dir;
 char *exa_dir;
 
@@ -159,7 +157,8 @@ int buildNekCase(const char *full_case_name,exaHmholtz hz){
   fclose(fp);
 
   // TODO: set from settings
-  int N=8,np=1,ldimt=1;
+  int N,np=1,ldimt=1;
+  exaSettingsGet(&N,"general::order",s);
 
   char ver[10];
   int nelgv,nelgt,ndim;
@@ -227,14 +226,10 @@ int buildNekCase(const char *full_case_name,exaHmholtz hz){
   retval=system(buf);
   if (retval) exit(EXIT_FAILURE);;
 
-  exaFree(cache_dir);
-  exaFree(case_dir);
-  exaFree(case_name);
-
   return 0;
 }
 
-int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz) {
+int nekSetup(exaMesh *mesh_,const char *casename,exaHmholtz hz){
   exaHandle h;
   exaHmholtzGetHandle(hz,&h);
 
@@ -246,56 +241,31 @@ int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz) {
   if(rank==0) buildNekCase(casename,hz);
   exaBarrier(h);
 
-#if 0
   //TODO read from settings
   int nscal=1;
 
-  char cwd[FILENAME_MAX];
-  getcwd(cwd,sizeof(cwd));
+  nek_interface_init(nek_comm,(char*)case_dir,(char*)cache_dir,
+    (char*)case_name,nscal);
 
-  nek_interface_init(nek_comm,(char *)cwd,(char *)casename,nscal);
+  exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
 
-  nekData.param = (double *) nek_ptr("param");
-  nekData.ifield = (int *) nek_ptr("ifield");
-  nekData.istep = (int *) nek_ptr("istep");
-  nekData.time = (double *) nek_ptr("time");
+  mesh->ndim=*(int*)nek_ptr("ndim");
+  mesh->nx1 =*(int*)nek_ptr("nx1");
+  mesh->nelt=*(int*)nek_ptr("nelt");
+  mesh->nelv=*(int*)nek_ptr("nelv");
+  mesh->lelt=*(int*)nek_ptr("lelt");
 
-  nekData.ndim = *(int *) nek_ptr("ndim");
-  nekData.nelt = *(int *) nek_ptr("nelt");
-  nekData.nelv = *(int *) nek_ptr("nelv");
-  nekData.lelt = *(int *) nek_ptr("lelt");
-  nekData.nx1 =  *(int *) nek_ptr("nx1");
+  mesh->xc =(double*)nek_ptr("xc");
+  mesh->yc =(double*)nek_ptr("yc");
+  mesh->zc =(double*)nek_ptr("zc");
+  mesh->xm1=(double*)nek_ptr("xm1");
+  mesh->ym1=(double*)nek_ptr("ym1");
+  mesh->zm1=(double*)nek_ptr("zm1");
 
-  nekData.vx = (double *) nek_ptr("vx");
-  nekData.vy = (double *) nek_ptr("vy");
-  nekData.vz = (double *) nek_ptr("vz");
-  nekData.pr = (double *) nek_ptr("pr");
-  nekData.t  = (double *) nek_ptr("t");
+  mesh->glo_num = (long long *)nek_ptr("glo_num");
 
-  nekData.ifgetu = (int *) nek_ptr("ifgetu");
-  nekData.ifgetp = (int *) nek_ptr("ifgetp");
-
-  nekData.unx = (double *) nek_ptr("unx");
-  nekData.uny = (double *) nek_ptr("uny");
-  nekData.unz = (double *) nek_ptr("unz");
-
-  nekData.xm1 = (double *) nek_ptr("xm1");
-  nekData.ym1 = (double *) nek_ptr("ym1");
-  nekData.zm1 = (double *) nek_ptr("zm1");
-  nekData.xc = (double *) nek_ptr("xc");
-  nekData.yc = (double *) nek_ptr("yc");
-  nekData.zc = (double *) nek_ptr("zc");
-
-  nekData.ngv = *(long long *) nek_ptr("ngv");
-  nekData.glo_num = (long long *) nek_ptr("glo_num");
-  nekData.cbscnrs = (double *) nek_ptr("cb_scnrs");
-  nekData.cbc = (char *) nek_ptr("cbc");
-  nekData.boundaryID = (int *) nek_ptr("boundaryID");
-  nekData.eface1 = (int *) nek_ptr("eface1");
-  nekData.eface = (int *) nek_ptr("eface");
-  nekData.icface = (int *) nek_ptr("icface");
-  nekData.comm = MPI_Comm_f2c(*(int *) nek_ptr("nekcomm"));
+  mesh->cbc       =(char*)nek_ptr("cbc");
+  mesh->boundaryID=(int *)nek_ptr("boundaryID");
 
   return 0;
-#endif
 }
