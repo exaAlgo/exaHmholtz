@@ -5,7 +5,9 @@
 #include <unistd.h>
 
 nekData_private nekData;
+char *case_name;
 char *cache_dir;
+char *case_dir;
 char *nek5000_dir;
 char *exa_dir;
 
@@ -101,16 +103,17 @@ void mkSIZE(exaHandle h,int lx1,int lxd,exaInt lelt,exaLong lelg,
     fputs(sizeFile,fp);
     fclose(fp);
     free(sizeFile);
-  } else {
+  } else
     exaDebug(h,"Using existing SIZE file: %s/SIZE\n",cache_dir);
-  }
+
+  exaFree(line);
 }
 
-int buildNekCase(const char *casename,exaHmholtz hz){
+int buildNekCase(const char *full_case_name,exaHmholtz hz){
   exaHandle h;
   exaHmholtzGetHandle(hz,&h);
 
-  exaDebug(h,"Building Nek5000 case: %s\n",casename);
+  exaDebug(h,"Building Nek5000 case: %s\n",full_case_name);
 
   exaSettings s;
   exaHmholtzGetSettings(hz,&s);
@@ -123,9 +126,17 @@ int buildNekCase(const char *casename,exaHmholtz hz){
   if(nek5000_dir==NULL)
     exaSettingsGet(&nek5000_dir,"nek5000::install_dir",s);
 
-  char *last=strrchr(casename,'/');
-  exaCalloc(last-casename+10,&cache_dir);
-  strncpy(cache_dir,casename,last-casename+1);
+  char *last=strrchr(full_case_name,'/');
+  exaCalloc(last-full_case_name+10,&case_dir);
+  strncpy(case_dir,full_case_name,last-full_case_name+1);
+  exaDebug(h,"case dir: %s\n",case_dir);
+
+  exaCalloc(strlen(full_case_name)-strlen(case_dir)+5,&case_name);
+  strcpy(case_name,last+1);
+  exaDebug(h,"case name: %s\n",case_name);
+
+  exaCalloc(last-full_case_name+10,&cache_dir);
+  strcpy(cache_dir,case_dir);
   strcpy(cache_dir+strlen(cache_dir),".cache");
   exaDebug(h,"cache dir: %s\n",cache_dir);
 
@@ -138,7 +149,7 @@ int buildNekCase(const char *casename,exaHmholtz hz){
   }
 
   FILE *fp;
-  sprintf(buf,"%s.re2",casename);
+  sprintf(buf,"%s.re2",full_case_name);
   fp=fopen(buf,"r");
   if(!fp){
     fprintf(stderr,"Error: Cannot find %s.re2\n",buf);
@@ -157,15 +168,15 @@ int buildNekCase(const char *casename,exaHmholtz hz){
   mkSIZE(h,N+1,1,lelt,nelgt,ndim,np,ldimt);
 
   // Copy case.usr file to cache_dir
-  sprintf(buf,"%s.usr",casename);
+  sprintf(buf,"%s.usr",full_case_name);
   if(access(buf,F_OK)!=-1){
-    exaDebug(h,"Using case file: %s.usr\n",casename);
-    sprintf(buf,"cp -pf %s.usr %s/ >build.log 2>&1",casename,
-      cache_dir);
+    exaDebug(h,"Using case file: %s.usr\n",full_case_name);
+    sprintf(buf,"cd %s && cp -pf %s.usr %s/ >build.log 2>&1",
+      cache_dir,full_case_name,cache_dir);
   } else {
     exaDebug(h,"Using zero.usr file from: %s/core\n",nek5000_dir);
-    sprintf(buf,"cp -pf %s/core/zero.usr %s/%s.usr >>build.log 2>&1",
-      nek5000_dir,cache_dir,casename);
+    sprintf(buf,"cd %s && cp -pf %s/core/zero.usr %s/%s.usr "
+      ">>build.log 2>&1",cache_dir,nek5000_dir,cache_dir,case_name);
   }
   retval=system(buf);
   if(retval){
@@ -173,41 +184,54 @@ int buildNekCase(const char *casename,exaHmholtz hz){
     exit(EXIT_FAILURE);
   }
 
-  exaFree(cache_dir);
-#if 0
-  // Copy Nek5000/core from install_dir to cache_dir
+  // Copy nek5000 from install_dir to cache_dir
   sprintf(buf,"cp -pr %s %s/",nek5000_dir,cache_dir);
-  retval = system(buf);
-  if (retval) exit(EXIT_FAILURE);;
+  retval=system(buf);
+  if(retval){
+    fprintf(stderr,"Error: Cannot find a case file\n");
+    exit(EXIT_FAILURE);;
+  }
 
   //TODO: Fix hardwired compiler flags
-  const char *fc;
-  const char *cc;
-  const char *fflags;
-  const char *cflags;
+  const char *fc="mpif77";
+  const char *cc="mpicc";
+  const char *fflags="-mcmodel=medium -fPIC -fcray-pointer";
+  const char *cflags="-fPIC";
 
-  sprintf(buf,"cd %s && FC=%s CC=%s"
-    "FFLAGS=%s CFLAGS=%s PPLIST=\"DPROCMAP PARRSB\" "
-    "NEK_SOURCE_ROOT=%s/nek5000 %s/nek5000/bin/nekconfig %s "
-    ">>build.log 2>&1",fc,cc,cache_dir,fflags,cflags,cache_dir,
-    cache_dir,casename);
-  retval = system(buf);
-  if (retval) exit(EXIT_FAILURE);;
+  sprintf(buf,"cd %s && FC=%s CC=%s FFLAGS=\"%s\" CFLAGS=\"%s\" "
+    "PPLIST=\"DPROCMAP PARRSB\" NEK_SOURCE_ROOT=%s/nek5000 "
+    "%s/nek5000/bin/nekconfig %s >>%s/build.log 2>&1",
+    cache_dir,fc,cc,fflags,cflags,cache_dir,cache_dir,case_name,
+    cache_dir);
+  exaDebug(h,"Generate Nek5000 makefile: %s\n",buf);
+  retval=system(buf);
+  if(retval) exit(EXIT_FAILURE);
 
-  //TODO
-  const char *exa_interfaces_dir;
+  sprintf(buf,"cd %s && FC=%s CC=%s FFLAGS=\"%s\" CFLAGS=\"%s\" "
+    "PPLIST=\"DPROCMAP PARRSB\" NEK_SOURCE_ROOT=%s/nek5000 "
+    "%s/nek5000/bin/nekconfig -build-dep >>%s/build.log 2>&1",
+    cache_dir,fc,cc,fflags,cflags,cache_dir,cache_dir,cache_dir);
+  retval=system(buf);
+  if(retval) exit(EXIT_FAILURE);;
 
-  sprintf(buf,"cd %s && EXA_WORKING_DIR=%s make -j4 -f "
+  char *exa_interfaces_dir;
+  exaSettingsGet(&exa_interfaces_dir,"hmholtz::interface_dir",s);
+
+  sprintf(buf,"cd %s && EXA_NEK_INTERFACE_DIR=%s/nek/share "
+    "EXA_NEK5000_DIR=%s EXA_WORKING_DIR=%s make -j4 -f "
     "%s/nek/share/Makefile nekInterface >>build.log 2>&1",
-    cache_dir,cache_dir,exa_interfaces_dir);
-  retval = system(buf);
+    cache_dir,exa_interfaces_dir,nek5000_dir,cache_dir,
+    exa_interfaces_dir);
+
+  exaDebug(h,"Build Nek interface: %s\n",buf);
+  retval=system(buf);
   if (retval) exit(EXIT_FAILURE);;
 
-  printf("done\n\n");
-  fflush(stdout);
-  sync();
+  exaFree(cache_dir);
+  exaFree(case_dir);
+  exaFree(case_name);
+
   return 0;
-#endif
 }
 
 int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz) {
@@ -220,6 +244,7 @@ int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz) {
   //TODO: Build nek case here
   int rank=exaRank(h);
   if(rank==0) buildNekCase(casename,hz);
+  exaBarrier(h);
 
 #if 0
   //TODO read from settings
