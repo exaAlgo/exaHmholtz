@@ -14,6 +14,8 @@ int exaHmholtzCreate(exaHandle h,exaSettings s,exaHmholtz *solver);
 int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h);
 int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s);
 int exaHmholtzSetup (exaSettings s,exaHmholtz solver);
+int exaHmholtzOperator(exaVector p,exaVector Ap,exaMesh mesh,
+  exaHmholtz hz);
 int exaHmholtzDestroy(exaHmholtz solver);
 //
 // exaMesh
@@ -43,10 +45,7 @@ exaScalar exaVectorWeightedNorm2(exaVector weights,exaVector vec,
 int exaHmholtzCGGeneral(exaVector x,
   int (*getAx)(exaVector,exaVector,exaHmholtz),exaVector b,
   exaScalar tol,int maxit,int verbose,exaHmholtz hz);
-#if 0
-int exaHmholtzCG(exaVector x,
-  int (*getAx)(exaVector,exaVector,exaHmholtz),exaVector b,
-  exaVector weights,exaScalar tol,int maxit,exaHmholtz hz);
-#endif
+int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,
+  exaScalar tol,int maxit,int verbose,exaHmholtz hz);
 
 #endif

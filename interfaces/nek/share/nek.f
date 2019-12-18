@@ -7,88 +7,88 @@ c-----------------------------------------------------------------------
 
       implicit none
 
-      integer len 
+      include 'SIZE'
+      include 'TOTAL'
+      include 'NEKINTF'
+
+      integer len
       character*(len) id
       integer i8
       integer*8 ptr
       pointer(ptr,i8)
 
-      include 'SIZE'
-      include 'TOTAL'
-      include 'NEKINTF'
-
-      if (id .eq. 'nelv') then 
+      if (id .eq. 'nelv') then
          ptr = loc(nelv)
-      elseif (id .eq. 'lelt') then 
+      elseif (id .eq. 'lelt') then
          ptr = loc(llelt)
-      elseif (id .eq. 'nekcomm') then 
+      elseif (id .eq. 'nekcomm') then
          ptr = loc(nekcomm)
-      elseif (id .eq. 'istep') then 
+      elseif (id .eq. 'istep') then
          ptr = loc(istep)
-      elseif (id .eq. 'param') then 
+      elseif (id .eq. 'param') then
          ptr = loc(param(1))
-      elseif (id .eq. 'nelt') then 
+      elseif (id .eq. 'nelt') then
          ptr = loc(nelt)
-      elseif (id .eq. 'nelv') then 
+      elseif (id .eq. 'nelv') then
          ptr = loc(nelv)
-      elseif (id .eq. 'ndim') then 
+      elseif (id .eq. 'ndim') then
          ptr = loc(ndim)
-      elseif (id .eq. 'nx1') then 
+      elseif (id .eq. 'nx1') then
          ptr = loc(nx1)
       elseif (id .eq. 'cb_scnrs') then
-         ptr = loc(sc_nrs(1)) 
+         ptr = loc(sc_nrs(1))
       elseif (id .eq. 'glo_num') then
-         ptr = loc(glo_num(1)) 
+         ptr = loc(glo_num(1))
       elseif (id .eq. 'ngv') then
-         ptr = loc(ngv) 
+         ptr = loc(ngv)
       elseif (id .eq. 'xc') then
-         ptr = loc(XC(1,1)) 
+         ptr = loc(XC(1,1))
       elseif (id .eq. 'yc') then
-         ptr = loc(YC(1,1)) 
+         ptr = loc(YC(1,1))
       elseif (id .eq. 'zc') then
-         ptr = loc(ZC(1,1)) 
+         ptr = loc(ZC(1,1))
       elseif (id .eq. 'xm1') then
-         ptr = loc(XM1) 
+         ptr = loc(XM1(1,1,1,1))
       elseif (id .eq. 'ym1') then
-         ptr = loc(YM1) 
+         ptr = loc(YM1(1,1,1,1))
       elseif (id .eq. 'zm1') then
-         ptr = loc(ZM1) 
+         ptr = loc(ZM1(1,1,1,1))
       elseif (id .eq. 'unx') then
-         ptr = loc(UNX(1,1,1,1)) 
+         ptr = loc(UNX(1,1,1,1))
       elseif (id .eq. 'uny') then
-         ptr = loc(UNY(1,1,1,1)) 
+         ptr = loc(UNY(1,1,1,1))
       elseif (id .eq. 'unz') then
-         ptr = loc(UNZ(1,1,1,1)) 
+         ptr = loc(UNZ(1,1,1,1))
       elseif (id .eq. 'cbc') then
-         ptr = loc(cbc(1,1,1)) 
+         ptr = loc(cbc(1,1,1))
       elseif (id .eq. 'eface1') then
-         ptr = loc(eface1) 
+         ptr = loc(eface1)
       elseif (id .eq. 'eface') then
-         ptr = loc(eface) 
+         ptr = loc(eface)
       elseif (id .eq. 'icface') then
-         ptr = loc(icface(1,1)) 
+         ptr = loc(icface(1,1))
       elseif (id .eq. 'ifield') then
-         ptr = loc(ifield) 
+         ptr = loc(ifield)
       elseif (id .eq. 'zgm1') then
-         ptr = loc(zgm1(1,1)) 
+         ptr = loc(zgm1(1,1))
       elseif (id .eq. 'wxm1') then
-         ptr = loc(wxm1(1)) 
+         ptr = loc(wxm1(1))
       elseif (id .eq. 'zgm2') then
-         ptr = loc(zgm2(1,1)) 
+         ptr = loc(zgm2(1,1))
       elseif (id .eq. 'wxm2') then
-         ptr = loc(wxm2(1)) 
+         ptr = loc(wxm2(1))
       elseif (id .eq. 'boundaryID') then
-         ptr = loc(boundaryID(1,1)) 
+         ptr = loc(boundaryID(1,1))
       elseif (id .eq. 'vx') then
-         ptr = loc(vx(1,1,1,1)) 
+         ptr = loc(vx(1,1,1,1))
       elseif (id .eq. 'vy') then
-         ptr = loc(vy(1,1,1,1)) 
+         ptr = loc(vy(1,1,1,1))
       elseif (id .eq. 'vz') then
-         ptr = loc(vz(1,1,1,1)) 
+         ptr = loc(vz(1,1,1,1))
       elseif (id .eq. 'pr') then
-         ptr = loc(pr(1,1,1,1)) 
+         ptr = loc(pr(1,1,1,1))
       elseif (id .eq. 't') then
-         ptr = loc(t(1,1,1,1,1)) 
+         ptr = loc(t(1,1,1,1,1))
       elseif (id .eq. 'time') then
          ptr = loc(time)
       elseif (id .eq. 'ifgetu') then
@@ -97,16 +97,16 @@ c-----------------------------------------------------------------------
          ptr = loc(getp)
       else
          write(6,*) 'ERROR: nek_ptr cannot find ', id
-         call exitt 
-      endif 
+         call exitt
+      endif
 
       return
       end
 c-----------------------------------------------------------------------
       subroutine nekf_setup(comm_in,path_in, session_in, npscal_in)
-
       include 'SIZE'
       include 'TOTAL'
+      include 'NONCON'
       include 'DOMAIN'
       include 'NEKINTF'
 
@@ -121,7 +121,7 @@ c-----------------------------------------------------------------------
       integer itest
       integer*8 itest8
       character ctest
-      logical ltest 
+      logical ltest
       logical ifbswap
 
       ! set word size for REAL
@@ -129,9 +129,9 @@ c-----------------------------------------------------------------------
       ! set word size for INTEGER
       isize = sizeof(itest)
       ! set word size for INTEGER*8
-      isize8 = sizeof(itest8) 
+      isize8 = sizeof(itest8)
       ! set word size for LOGICAL
-      lsize = sizeof(ltest) 
+      lsize = sizeof(ltest)
       ! set word size for CHARACTER
       csize = sizeof(ctest)
 
@@ -165,10 +165,10 @@ c-----------------------------------------------------------------------
       if (npscal_in .gt. 0) then
         ifheat = .true.
         npscal = npscal_in - 1
-        ifto   = .true.       
+        ifto   = .true.
         do i = 1,npscal
           ifpsco(i) = .true.
-        enddo 
+        enddo
       endif
 
       call bcastParam
@@ -177,7 +177,7 @@ c-----------------------------------------------------------------------
 
       call read_re2_hdr(ifbswap)
       call chkParam
-      call mapelpr 
+      call mapelpr
       call read_re2_data(ifbswap)
       do iel = 1,nelt
       do ifc = 1,2*ndim
@@ -188,18 +188,18 @@ c-----------------------------------------------------------------------
       call setvar          ! Initialize most variables
 
       igeom = 2
-      call setup_topo      ! Setup domain topology  
+      call setup_topo      ! Setup domain topology
       call genwz           ! Compute GLL points, weights, etc.
 
       if(nio.eq.0) write(6,*) 'call usrdat'
       call usrdat
-      if(nio.eq.0) write(6,'(A,/)') ' done :: usrdat' 
+      if(nio.eq.0) write(6,'(A,/)') ' done :: usrdat'
 
-      call gengeom(igeom)  ! Generate geometry, after usrdat 
+      call gengeom(igeom)  ! Generate geometry, after usrdat
 
       if(nio.eq.0) write(6,*) 'call usrdat2'
       call usrdat2
-      if(nio.eq.0) write(6,'(A,/)') ' done :: usrdat2' 
+      if(nio.eq.0) write(6,'(A,/)') ' done :: usrdat2'
 
       call fix_geom
       call geom_reset(1)    ! recompute Jacobians, etc.
@@ -213,7 +213,7 @@ c-----------------------------------------------------------------------
 
       call findSYMOrient
 
-      call set_vert(glo_num,ngv,2,nelv,vertex,.false.)
+      call set_vert(glo_num,ngv,nx1,nelt,vertex,.true.)
 
       if(nio.eq.0) write(6,*) 'call usrdat3'
       call usrdat3
@@ -303,7 +303,7 @@ c-----------------------------------------------------------------------
       include 'TSTEP'
 
       ifoutfld = .true.
-      if (iswitch .eq. 0) ifoutfld = .false. 
+      if (iswitch .eq. 0) ifoutfld = .false.
 
       return
       end
@@ -317,8 +317,8 @@ c-----------------------------------------------------------------------
       call setics()
       getu = 1
       getp = 1
-    
-      if (.not. ifgetu) getu = 0 
+
+      if (.not. ifgetu) getu = 0
       if (.not. ifgetp) getp = 0
 
       return
@@ -335,32 +335,32 @@ c-----------------------------------------------------------------------
 
       if (bID < 1) then ! not a boundary
         nekf_bcmap = 0
-        return 
-      endif 
+        return
+      endif
 
-      ibc = 0 
+      ibc = 0
       c = cbc_bmap(bID, ifld)
 
       if (ifld.eq.1) then
-        if (c.eq.'W  ') then 
+        if (c.eq.'W  ') then
           ibc = 1
-        else if (c.eq.'v  ') then 
+        else if (c.eq.'v  ') then
           ibc = 2
-        else if (c.eq.'o  ' .or. c.eq.'O  ') then 
+        else if (c.eq.'o  ' .or. c.eq.'O  ') then
           ibc = 3
-        else if (c.eq.'SYX') then 
+        else if (c.eq.'SYX') then
           ibc = 4
-        else if (c.eq.'SYY') then 
+        else if (c.eq.'SYY') then
           ibc = 5
-         else if (c.eq.'SYZ') then 
+         else if (c.eq.'SYZ') then
           ibc = 6
         endif
       else if(ifld.gt.1) then
-        if (c.eq.'t  ') then 
+        if (c.eq.'t  ') then
           ibc = 1
-        else if (c.eq.'f  ') then 
+        else if (c.eq.'f  ') then
           ibc = 2
-        else if (c.eq.'o  ' .or. c.eq.'O  ' .or. c.eq.'I  ') then 
+        else if (c.eq.'o  ' .or. c.eq.'O  ' .or. c.eq.'I  ') then
           ibc = 3
         endif
       endif
@@ -369,7 +369,7 @@ c      write(6,*) ifld, 'bcmap: ', bID, c, ibc
 
       if (ibc.eq.0) then
         write(6,*) 'Found unsupport BC type:', c
-        call exitt 
+        call exitt
       endif
 
       nekf_bcmap = ibc
@@ -389,8 +389,8 @@ c-----------------------------------------------------------------------
       do iel=1,nelt
       do ifc=1,2*ndim
          if (cbc(ifc,iel,1).eq.'SYM') then
-           bID = boundaryID(ifc,iel) 
-           call chknord(ifalgn,ifnorx,ifnory,ifnorz,ifc,iel) 
+           bID = boundaryID(ifc,iel)
+           call chknord(ifalgn,ifnorx,ifnory,ifnorz,ifc,iel)
            if (ifnorx) cbc_bmap(bID, 1) = 'SYX'
            if (ifnory) cbc_bmap(bID, 1) = 'SYY'
            if (ifnorz) cbc_bmap(bID, 1) = 'SYZ'

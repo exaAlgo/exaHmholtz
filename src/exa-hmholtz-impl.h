@@ -29,11 +29,17 @@ struct exaMesh_private{
 
   exaScalar *xc ,*yc ,*zc;
 
+  /* x,y and z co-ordinates of mesh points */
   exaScalar *xm1 ,*ym1 ,*zm1;
   exaVector d_xm1,d_ym1,d_zm1;
 
+  /* inv degree of a dof */
+  exaScalar *rmult;
+  exaVector d_rmult;
+
+  /* global numbering of dofs */
   exaLong *glo_num;
-  exaVector d_gloNum;
+  exaVector d_glo_num;
 
   char *cbc;
   int *boundaryID;
