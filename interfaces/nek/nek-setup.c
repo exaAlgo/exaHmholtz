@@ -255,17 +255,64 @@ int nekSetup(exaMesh *mesh_,const char *casename,exaHmholtz hz){
   mesh->nelv=*(int*)nek_ptr("nelv");
   mesh->lelt=*(int*)nek_ptr("lelt");
 
-  mesh->xc =(double*)nek_ptr("xc");
-  mesh->yc =(double*)nek_ptr("yc");
-  mesh->zc =(double*)nek_ptr("zc");
   mesh->xm1=(double*)nek_ptr("xm1");
   mesh->ym1=(double*)nek_ptr("ym1");
   mesh->zm1=(double*)nek_ptr("zm1");
 
-  mesh->glo_num = (long long *)nek_ptr("glo_num");
+  mesh->glo_num=(long long *)nek_ptr("glo_num");
+  mesh->D=(double *)nek_ptr("dxm1");
 
-  mesh->cbc       =(char*)nek_ptr("cbc");
+  double *g11,*g12,*g13,*g22,*g23,*g33,*bm1;
+  g11=nek_ptr("g1m1");
+  g12=nek_ptr("g2m1");
+  g13=nek_ptr("g3m1");
+  g22=nek_ptr("g4m1");
+  g23=nek_ptr("g5m1");
+  g33=nek_ptr("g6m1");
+  bm1=nek_ptr("bm1");
+
+  int nelt=mesh->nelt;
+  int ndim=mesh->ndim;
+  int ngeom=((ndim+1)*ndim)/2+1; //+1 is for the Jacobian
+
+  int nx1=mesh->nx1;
+  exaUInt ndofs=nx1*nx1;
+  if(ndim==3) ndofs*=nx1;
+
+  exaUInt size=nelt*ngeom*ndofs;
+  exaMalloc(size,&mesh->geom);
+
+  exaUInt count,e,g,i;
+  if(ndim==2){
+    for(e=0;e<nelt;e++){
+      for(i=0;i<ndofs;i++){
+        mesh->geom[e*ngeom*ndofs+0*ndofs+i]=g11[i];
+        mesh->geom[e*ngeom*ndofs+1*ndofs+i]=g12[i];
+        mesh->geom[e*ngeom*ndofs+2*ndofs+i]=g22[i];
+        mesh->geom[e*ngeom*ndofs+3*ndofs+i]=bm1[i];//Jacobian
+      }
+    }
+  } else if(ndim==3){
+    for(e=0;e<nelt;e++){
+      for(i=0;i<ndofs;i++){
+        mesh->geom[e*ngeom*ndofs+0*ndofs+i]=g11[i];
+        mesh->geom[e*ngeom*ndofs+1*ndofs+i]=g12[i];
+        mesh->geom[e*ngeom*ndofs+2*ndofs+i]=g13[i];
+        mesh->geom[e*ngeom*ndofs+3*ndofs+i]=g22[i];
+        mesh->geom[e*ngeom*ndofs+4*ndofs+i]=g23[i];
+        mesh->geom[e*ngeom*ndofs+5*ndofs+i]=g33[i];
+        mesh->geom[e*ngeom*ndofs+6*ndofs+i]=bm1[i];//Jacobian
+      }
+    }
+  }
+
   mesh->boundaryID=(int *)nek_ptr("boundaryID");
 
+  return 0;
+}
+
+int nekFinalize(exaMesh mesh){
+  exaFree(mesh->geom);
+  exaFree(mesh);
   return 0;
 }

@@ -26,6 +26,9 @@ int main(int argc,char *argv[])
     exaMeshGetElements(mesh),exaMeshGet1DDofs(mesh),
     exaMeshGetLocalDofs(mesh));
 
+
+  nekFinalize(mesh);
+
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);
 

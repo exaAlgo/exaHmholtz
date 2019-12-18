@@ -13,5 +13,6 @@
 
 int buildNekCase(const char *casename,exaHmholtz hz);
 int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz);
+int nekFinalize(exaMesh mesh);
 
 #endif

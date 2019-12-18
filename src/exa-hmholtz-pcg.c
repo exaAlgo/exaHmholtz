@@ -91,6 +91,7 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,
     exaHmholtzOperator(p,Ap,mesh,hz);
 
     //dssum
+    //exaDsSum(Ap,mesh,hmhz);
 
     exaScalar pAp=exaVectorInnerProduct2(p,Ap,hz);
     alpha=rdotr/pAp;

@@ -27,8 +27,6 @@ struct exaMesh_private{
   exaInt nelv;
   exaInt lelt;
 
-  exaScalar *xc ,*yc ,*zc;
-
   /* x,y and z co-ordinates of mesh points */
   exaScalar *xm1 ,*ym1 ,*zm1;
   exaVector d_xm1,d_ym1,d_zm1;
@@ -39,15 +37,17 @@ struct exaMesh_private{
 
   /* global numbering of dofs */
   exaLong *glo_num;
-  exaVector d_glo_num;
+  exaVector d_globalStart;
+  exaVector d_globalIds;
 
-  char *cbc;
   int *boundaryID;
   exaVector d_maskedIds;
 
   exaScalar *geom;
   exaScalar *jacobians;
+
   exaScalar *D,*Dt;
+  exaVector d_D,d_Dt;
 };
 
 #endif

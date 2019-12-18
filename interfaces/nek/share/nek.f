@@ -95,6 +95,22 @@ c-----------------------------------------------------------------------
          ptr = loc(getu)
       elseif (id .eq. 'ifgetp') then
          ptr = loc(getp)
+      elseif (id .eq. 'dxm1') then
+         ptr = loc(dxm1(1,1))
+      elseif (id .eq. 'g1m1') then
+         ptr = loc(g1m1(1,1,1,1))
+      elseif (id .eq. 'g2m1') then
+         ptr = loc(g2m1(1,1,1,1))
+      elseif (id .eq. 'g3m1') then
+         ptr = loc(g3m1(1,1,1,1))
+      elseif (id .eq. 'g4m1') then
+         ptr = loc(g4m1(1,1,1,1))
+      elseif (id .eq. 'g5m1') then
+         ptr = loc(g5m1(1,1,1,1))
+      elseif (id .eq. 'g6m1') then
+         ptr = loc(g6m1(1,1,1,1))
+      elseif (id .eq. 'bm1') then
+         ptr = loc(bm1(1,1,1,1))
       else
          write(6,*) 'ERROR: nek_ptr cannot find ', id
          call exitt
