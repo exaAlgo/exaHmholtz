@@ -16,6 +16,14 @@ int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s);
 int exaHmholtzSetup (exaSettings s,exaHmholtz solver);
 int exaHmholtzDestroy(exaHmholtz solver);
 //
+// exaMesh
+//
+exaInt exaMeshGetElements(exaMesh mesh);
+int exaMeshGet1DDofs(exaMesh mesh);
+int exaMeshGetElementDofs(exaMesh mesh);
+int exaMeshGetLocalDofs(exaMesh mesh);
+int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz);
+//
 // vector operations
 //
 int exaVectorScaledAdd(exaScalar alpha,exaVector x,exaScalar beta,

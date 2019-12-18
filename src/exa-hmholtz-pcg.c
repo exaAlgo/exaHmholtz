@@ -13,10 +13,10 @@ int exaHmholtzCGGeneral(exaVector x,
   exaVector Ax=hz->tmp_4;
 
   exaHandle h; exaHmholtzGetHandle(hz,&h);
-  exaVectorCreate(h,size,&r );
-  exaVectorCreate(h,size,&p );
-  exaVectorCreate(h,size,&Ap);
-  exaVectorCreate(h,size,&Ax);
+  exaVectorCreate(h,size,exaScalar_t,&r );
+  exaVectorCreate(h,size,exaScalar_t,&p );
+  exaVectorCreate(h,size,exaScalar_t,&Ap);
+  exaVectorCreate(h,size,exaScalar_t,&Ax);
 
   exaScalar normB=exaVectorNorm2(b,hz);
   exaScalar TOL=max(tol*tol*normB,tol*tol);
@@ -74,10 +74,10 @@ int exaHmholtzCG(exaVector x,
   exaVector Ax=hz->tmp_Ax;
 
   exaHandle h; exaHmholtzGetHandle(hz,&h);
-  exaVectorCreate(h,size,&r );
-  exaVectorCreate(h,size,&p );
-  exaVectorCreate(h,size,&Ap);
-  exaVectorCreate(h,size,&Ax);
+  exaVectorCreate(h,size,exaScalar_t,&r );
+  exaVectorCreate(h,size,exaScalar_t,&p );
+  exaVectorCreate(h,size,exaScalar_t,&Ap);
+  exaVectorCreate(h,size,exaScalar_t,&Ax);
 
   exaScalar normB=exaVectorWeightedNorm2(weights,b,hz);
   exaScalar TOL=max(tol*tol*normB,tol*tol);

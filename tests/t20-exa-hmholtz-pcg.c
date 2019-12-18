@@ -46,14 +46,16 @@ int main(int argc,char *argv[])
     }
     A[i*size+i]+=100+fabs(sum);
   }
-  exaVectorCreate(h,size*size,&Amatrix); exaVectorWrite(Amatrix,A);
+  exaVectorCreate(h,size*size,exaScalar_t,&Amatrix);
+  exaVectorWrite(Amatrix,A);
 
   // set RHS
   exaScalar *Axx; exaCalloc(size,&Axx); matVec(A,xx,size,Axx);
-  exaVector b; exaVectorCreate(h,size,&b); exaVectorWrite(b,Axx);
+  exaVector b; exaVectorCreate(h,size,exaScalar_t,&b);
+  exaVectorWrite(b,Axx);
 
   // Call CG with zero initial guess
-  exaVector x; exaVectorCreate(h,size,&x);
+  exaVector x; exaVectorCreate(h,size,exaScalar_t,&x);
   exaScalar *in; exaMalloc(size,&in);
   exaUInt i;
   for(i=0;i<size;i++) in[i]=0.0;

@@ -27,7 +27,7 @@ exaScalar exaVectorInnerProduct2(exaVector x,exaVector y,
     exit(0);
   }
   exaUInt nBlocks=(size+blockSize-1)/blockSize;
-  exaVector out; exaVectorCreate(h,nBlocks,&out);
+  exaVector out; exaVectorCreate(h,nBlocks,exaScalar_t,&out);
 
   exaKernelRun(hz->vectorInnerProduct2,getExaUInt(size),x,y,out);
 
@@ -62,7 +62,7 @@ exaScalar exaVectorWeightedInnerProduct2(exaVector weights,
     exit(0);
   }
   exaUInt nBlocks=(size+blockSize-1)/blockSize;
-  exaVector out; exaVectorCreate(h,nBlocks,&out);
+  exaVector out; exaVectorCreate(h,nBlocks,exaScalar_t,&out);
 
   exaKernelRun(hz->vectorWeightedInnerProduct2,getExaUInt(size),
     weights,x,y,out);

@@ -21,6 +21,10 @@ int main(int argc,char *argv[])
 
   exaMesh mesh;
   nekSetup(&mesh,"/home/thilina/Repos/NekExamples/b_0001/bb",hmhz);
+  exaMeshSetup(mesh,hmhz);
+  printf("nel:%d 1d dofs:%d local dofs:%d\n",
+    exaMeshGetElements(mesh),exaMeshGet1DDofs(mesh),
+    exaMeshGetLocalDofs(mesh));
 
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);

@@ -28,12 +28,16 @@ struct exaMesh_private{
   exaInt lelt;
 
   exaScalar *xc ,*yc ,*zc;
-  exaScalar *xm1,*ym1,*zm1;
+
+  exaScalar *xm1 ,*ym1 ,*zm1;
+  exaVector d_xm1,d_ym1,d_zm1;
 
   exaLong *glo_num;
+  exaVector d_gloNum;
 
   char *cbc;
   int *boundaryID;
+  exaVector d_maskedIds;
 
   exaScalar *geom;
   exaScalar *jacobians;

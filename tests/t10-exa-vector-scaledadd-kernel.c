@@ -23,8 +23,8 @@ int main(int argc,char *argv[])
   exaHmholtzCreate(h,s,&hmhz);
 
   exaVector vec1,vec2;
-  exaVectorCreate(h,M,&vec1);
-  exaVectorCreate(h,M,&vec2);
+  exaVectorCreate(h,M,exaScalar_t,&vec1);
+  exaVectorCreate(h,M,exaScalar_t,&vec2);
 
   exaScalar *in,*out;
   exaMalloc(M,&in);
