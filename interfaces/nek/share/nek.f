@@ -111,6 +111,8 @@ c-----------------------------------------------------------------------
          ptr = loc(g6m1(1,1,1,1))
       elseif (id .eq. 'bm1') then
          ptr = loc(bm1(1,1,1,1))
+      elseif (id .eq. 'v1mask') then
+         ptr = loc(v1mask(1,1,1,1))
       else
          write(6,*) 'ERROR: nek_ptr cannot find ', id
          call exitt
@@ -229,7 +231,7 @@ c-----------------------------------------------------------------------
 
       call findSYMOrient
 
-      call set_vert(glo_num,ngv,nx1,nelt,vertex,.true.)
+      call set_vert(glo_num,ngv,nx1,nelt,vertex,.false.)
 
       if(nio.eq.0) write(6,*) 'call usrdat3'
       call usrdat3

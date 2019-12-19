@@ -274,6 +274,7 @@ int nekSetup(exaMesh *mesh_,const char *casename,exaHmholtz hz){
   int nelt=mesh->nelt;
   int ndim=mesh->ndim;
   int ngeom=((ndim+1)*ndim)/2+1; //+1 is for the Jacobian
+  mesh->ngeom=ngeom;
 
   int nx1=mesh->nx1;
   exaUInt ndofs=nx1*nx1;
@@ -306,7 +307,8 @@ int nekSetup(exaMesh *mesh_,const char *casename,exaHmholtz hz){
     }
   }
 
-  mesh->boundaryID=(int *)nek_ptr("boundaryID");
+  mesh->boundaryID=(int*)nek_ptr("boundaryID");
+  mesh->mask=(double*)nek_ptr("v1mask");
 
   return 0;
 }

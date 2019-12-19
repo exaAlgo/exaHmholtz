@@ -29,7 +29,6 @@ struct exaMesh_private{
 
   /* x,y and z co-ordinates of mesh points */
   exaScalar *xm1 ,*ym1 ,*zm1;
-  exaVector d_xm1,d_ym1,d_zm1;
 
   /* inv degree of a dof */
   exaScalar *rmult;
@@ -40,14 +39,21 @@ struct exaMesh_private{
   exaVector d_globalStart;
   exaVector d_globalIds;
 
+  /* gather scatter setup */
+  exaGS gs; exaBuffer buf;
+
+  /* boundary data */
   int *boundaryID;
-  exaVector d_maskedIds;
+  exaScalar *mask;
+  exaArray maskIds;
+  exaVector d_maskIds;
 
   exaScalar *geom;
-  exaScalar *jacobians;
+  exaVector d_geom;
+  int ngeom;
 
-  exaScalar *D,*Dt;
-  exaVector d_D,d_Dt;
+  exaScalar *D;
+  exaVector d_D;
 };
 
 #endif
