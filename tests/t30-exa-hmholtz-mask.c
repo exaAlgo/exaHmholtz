@@ -18,9 +18,11 @@ int main(int argc,char *argv[])
   exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
   exaSettings s; exaSettingsInit(h,NULL,&s);
+  exaSettingsSet("general::order",getExaInt(2),s);
 
-  exaHmholtz hmhz;
-  exaHmholtzCreate(h,s,&hmhz);
+  exaHmholtz hmhz; exaHmholtzCreate(h,s,&hmhz);
+
+  exaHmholtzSetup(hmhz);
 
   exaVector vec,maskIds;
   exaVectorCreate(h,M,exaScalar_t,&vec);
@@ -48,7 +50,7 @@ int main(int argc,char *argv[])
   exaVectorRead(vec,out);
   for(i=0;i<M;i++)
     if(fabs(in[i]-out[i])>EXA_TOL)
-      fprintf(stderr,"norm: %lf != %lf\n",in[i],out[i]);
+      fprintf(stderr,"Mask error: %lf != %lf\n",in[i],out[i]);
   exaFree(out);
   exaFree(in);
 

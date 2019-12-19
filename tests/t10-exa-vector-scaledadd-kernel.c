@@ -18,9 +18,16 @@ int main(int argc,char *argv[])
   exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
   exaSettings s; exaSettingsInit(h,NULL,&s);
+  exaSettingsSet("general::order",getExaInt(2),s);
 
   exaHmholtz hmhz;
   exaHmholtzCreate(h,s,&hmhz);
+
+  exaMesh mesh;
+  exaMeshRead(&mesh,"/home/thilina/Repos/NekExamples/b_0001/bb",
+    "nek",s);
+
+  exaHmholtzSetup(hmhz);
 
   exaVector vec1,vec2;
   exaVectorCreate(h,M,exaScalar_t,&vec1);
@@ -48,6 +55,7 @@ int main(int argc,char *argv[])
   exaDestroy(vec1);
   exaDestroy(vec2);
 
+  exaMeshFinalize(mesh);
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);
 

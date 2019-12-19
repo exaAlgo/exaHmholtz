@@ -5,7 +5,7 @@
 static const char *kernelDir="/kernels";
 static const char *interfaceDir="/interfaces";
 
-int exaHmholtzSetup(exaSettings s,exaHmholtz solver){
+int setupSettings(exaSettings s,exaHmholtz solver){
   solver->s=s;
 
   exaHandle h; exaHmholtzGetHandle(solver,&h);
@@ -50,7 +50,15 @@ int exaHmholtzCreate(exaHandle h,exaSettings s,exaHmholtz *solver_){
   exaHmholtz solver=*solver_;
   solver->h=h;
 
-  exaHmholtzSetup(s,solver);
+  setupSettings(s,solver);
+
+  solver->Ax=NULL;
+  solver->vectorWeightedNorm2=NULL;
+  solver->vectorWeightedInnerProduct2=NULL;
+  solver->vectorInnerProduct2=NULL;
+  solver->vectorScaledAdd=NULL;
+  solver->mask=NULL;
+  solver->hmholtzAx=NULL;
 
   return 0;
 }
@@ -62,6 +70,51 @@ int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s){
 
 int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h){
   *h=solver->h;
+  return 0;
+}
+
+int buildKernels(exaHmholtz hmhz){
+  exaHandle   h; exaHmholtzGetHandle  (hmhz,&h);
+  exaSettings s; exaHmholtzGetSettings(hmhz,&s);
+
+  const char *kernelDir;
+  exaSettingsGet(&kernelDir,"hmholtz::kernel_dir",s);
+
+  char fname[BUFSIZ];
+  strcpy(fname,kernelDir);
+  int pathLength=strlen(kernelDir);
+
+  strcpy(fname+pathLength,"/vector");
+  exaDebug(h,"Hmholtz vector kernels=%s\n",fname);
+  exaProgramCreate(h,fname,s,&hmhz->p);
+
+  exaKernelCreate(hmhz->p,"scaledAdd",&hmhz->vectorScaledAdd);
+  exaKernelCreate(hmhz->p,"weightedInnerProduct2",
+    &hmhz->vectorWeightedInnerProduct2);
+  exaKernelCreate(hmhz->p,"innerProduct2",
+    &hmhz->vectorInnerProduct2);
+  exaKernelCreate(hmhz->p,"weightedNorm2",
+    &hmhz->vectorWeightedNorm2);
+  exaProgramFree(hmhz->p);
+
+  strcpy(fname+pathLength,"/mask");
+  exaDebug(h,"Hmholtz mask kernels=%s\n",fname);
+  exaProgramCreate(h,fname,s,&hmhz->p);
+  exaKernelCreate(hmhz->p,"mask",&hmhz->mask);
+  exaProgramFree(hmhz->p);
+
+  strcpy(fname+pathLength,"/hmholtz");
+  exaDebug(h,"Hmholtz operator kernel=%s\n",fname);
+  exaProgramCreate(h,fname,s,&hmhz->p);
+  exaKernelCreate(hmhz->p,"BK5",&hmhz->hmholtzAx);
+  exaProgramFree(hmhz->p);
+
+  return 0;
+}
+
+int exaHmholtzSetup(exaHmholtz solver){
+  buildKernels(solver);
+
   return 0;
 }
 

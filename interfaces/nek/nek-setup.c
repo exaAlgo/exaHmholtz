@@ -107,14 +107,11 @@ void mkSIZE(exaHandle h,int lx1,int lxd,exaInt lelt,exaLong lelg,
   exaFree(line);
 }
 
-int buildNekCase(const char *full_case_name,exaHmholtz hz){
+int buildNekCase(const char *full_case_name,exaSettings s){
   exaHandle h;
-  exaHmholtzGetHandle(hz,&h);
+  exaSettingsGetHandle(s,&h);
 
   exaDebug(h,"Building Nek5000 case: %s\n",full_case_name);
-
-  exaSettings s;
-  exaHmholtzGetSettings(hz,&s);
 
   exa_dir=getenv("EXA_DIR");
   if(exa_dir==NULL)
@@ -229,16 +226,16 @@ int buildNekCase(const char *full_case_name,exaHmholtz hz){
   return 0;
 }
 
-int nekSetup(exaMesh *mesh_,const char *casename,exaHmholtz hz){
+int nekSetup(exaMesh mesh,const char *casename,exaSettings s){
   exaHandle h;
-  exaHmholtzGetHandle(hz,&h);
+  exaSettingsGetHandle(s,&h);
 
   MPI_Comm c=exaGetMPIComm(h);
   MPI_Fint nek_comm=MPI_Comm_c2f(c);
 
   //TODO: Build nek case here
   int rank=exaRank(h);
-  if(rank==0) buildNekCase(casename,hz);
+  if(rank==0) buildNekCase(casename,s);
   exaBarrier(h);
 
   //TODO read from settings
@@ -246,8 +243,6 @@ int nekSetup(exaMesh *mesh_,const char *casename,exaHmholtz hz){
 
   nek_interface_init(nek_comm,(char*)case_dir,(char*)cache_dir,
     (char*)case_name,nscal);
-
-  exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
 
   mesh->ndim=*(int*)nek_ptr("ndim");
   mesh->nx1 =*(int*)nek_ptr("nx1");
@@ -314,7 +309,5 @@ int nekSetup(exaMesh *mesh_,const char *casename,exaHmholtz hz){
 }
 
 int nekFinalize(exaMesh mesh){
-  exaFree(mesh->geom);
-  exaFree(mesh);
   return 0;
 }

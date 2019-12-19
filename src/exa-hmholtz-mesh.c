@@ -1,4 +1,5 @@
 #include <exa-hmholtz-impl.h>
+#include <nek-setup.h>
 
 #include <math.h>
 
@@ -6,50 +7,8 @@ typedef struct{
   exaInt id;
 } maskID;
 
-int buildKernels(exaMesh mesh,exaHmholtz hmhz){
-  exaHandle   h; exaHmholtzGetHandle  (hmhz,&h);
-  exaSettings s; exaHmholtzGetSettings(hmhz,&s);
-
-  const char *installDir,*kernelDir;
-  exaSettingsGet(&installDir,"hmholtz::install_dir",s);
-  exaSettingsGet(&kernelDir ,"hmholtz::kernel_dir ",s);
-
-  char fname[BUFSIZ]; strcpy(fname,installDir);
-  int pathLength=strlen(installDir);
-  strcpy(fname+pathLength,kernelDir);
-  pathLength+=strlen(kernelDir);
-
-  strcpy(fname+pathLength,"/vector");
-  exaDebug(h,"Hmholtz vector kernels=%s\n",fname);
-  exaProgramCreate(h,fname,s,&hmhz->p);
-
-  exaKernelCreate(hmhz->p,"scaledAdd",&hmhz->vectorScaledAdd);
-  exaKernelCreate(hmhz->p,"weightedInnerProduct2",
-    &hmhz->vectorWeightedInnerProduct2);
-  exaKernelCreate(hmhz->p,"innerProduct2",
-    &hmhz->vectorInnerProduct2);
-  exaKernelCreate(hmhz->p,"weightedNorm2",
-    &hmhz->vectorWeightedNorm2);
-  exaProgramFree(hmhz->p);
-
-  strcpy(fname+pathLength,"/mask");
-  exaDebug(h,"Hmholtz mask kernels=%s\n",fname);
-  exaProgramCreate(h,fname,s,&hmhz->p);
-  exaKernelCreate(hmhz->p,"mask",&hmhz->mask);
-  exaProgramFree(hmhz->p);
-
-  strcpy(fname+pathLength,"/hmholtz");
-  exaDebug(h,"Hmholtz operator kernel=%s\n",fname);
-  exaProgramCreate(h,fname,s,&hmhz->p);
-  exaKernelCreate(hmhz->p,"BK5",&hmhz->hmholtzAx);
-  exaProgramFree(hmhz->p);
-
-  return 0;
-}
-
-int copyDataToDevice(exaMesh mesh,exaHmholtz hmhz){
-  exaHandle h;
-  exaHmholtzGetHandle(hmhz,&h);
+int copyDataToDevice(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
 
   int nelt =mesh->nelt;
   int ndim =mesh->ndim;
@@ -113,22 +72,74 @@ int copyDataToDevice(exaMesh mesh,exaHmholtz hmhz){
   return 0;
 }
 
-int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
-  copyDataToDevice(mesh,hmhz);
-  buildKernels(mesh,hmhz);
+int exaMeshRead(exaMesh *mesh_,const char *meshName,
+  const char *interface,exaSettings s)
+{
+  exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
+  exaHandle h; exaSettingsGetHandle(s,&h);
+  exaMeshSetHandle(mesh,&h);
 
+  if(strcmp(interface,"nek")==0){
+    nekSetup(mesh,meshName,s);
+  }
+
+  //TODO: Fix following
+  int nx1=exaMeshGet1DDofs(mesh);
+  int elemDofs=exaMeshGetElementDofs(mesh);
+  int ngeom=exaMeshGetNGeom(mesh);
+
+  //p_Nggeo,p_Np
+  exaSettingsSet("defines::p_Nq"   ,getExaUInt(nx1     ),s);
+  exaSettingsSet("defines::p_Np"   ,getExaUInt(elemDofs),s);
+  exaSettingsSet("defines::p_Nggeo",getExaUInt(ngeom   ),s);
+
+  //p_G00ID,p_G01ID,p_G02ID,p_G11ID,p_G12ID,p_G22ID,p_GWJID
+  int ndim=exaMeshGetDim(mesh);
+  if(ndim==2){
+    exaSettingsSet("defines::p_G00ID",getExaUInt(0),s);
+    exaSettingsSet("defines::p_G01ID",getExaUInt(1),s);
+    exaSettingsSet("defines::p_G11ID",getExaUInt(2),s);
+    exaSettingsSet("defines::p_GWJID",getExaUInt(3),s);
+  }else{
+    exaSettingsSet("defines::p_G00ID",getExaUInt(0),s);
+    exaSettingsSet("defines::p_G01ID",getExaUInt(1),s);
+    exaSettingsSet("defines::p_G02ID",getExaUInt(2),s);
+    exaSettingsSet("defines::p_G11ID",getExaUInt(3),s);
+    exaSettingsSet("defines::p_G12ID",getExaUInt(4),s);
+    exaSettingsSet("defines::p_G22ID",getExaUInt(5),s);
+    exaSettingsSet("defines::p_GWJID",getExaUInt(6),s);
+  }
+
+  copyDataToDevice(mesh);
+
+  return 0;
+}
+
+int exaMeshSetHandle(exaMesh mesh,exaHandle *h){
+  mesh->h=*h;
+  return 0;
+}
+
+int exaMeshGetHandle(exaMesh mesh,exaHandle *h){
+  *h=mesh->h;
   return 0;
 }
 
 int exaMeshFinalize(exaMesh mesh){
   exaDestroy(mesh->d_maskIds);
   exaDestroy(mesh->maskIds);
+
   exaDestroy(mesh->d_rmult);
   exaFree(mesh->rmult);
+
   exaBufferFree(mesh->buf);
   exaGSFree(mesh->gs);
+
+  exaFree(mesh->geom);
   exaDestroy(mesh->d_geom);
+
   exaDestroy(mesh->d_D);
+  exaFree(mesh);
 
   return 0;
 }
@@ -150,4 +161,13 @@ int exaMeshGetLocalDofs(exaMesh mesh){
   int dofs=mesh->nx1;
   exaInt nelt=mesh->nelt;
   return (mesh->ndim==2) ? dofs*dofs*nelt : dofs*dofs*dofs*nelt;
+}
+
+int exaMeshGetNGeom(exaMesh mesh){
+  int ndim=mesh->ndim;
+  return (ndim*(ndim+1))/2;
+}
+
+int exaMeshGetDim(exaMesh mesh){
+  return mesh->ndim;
 }

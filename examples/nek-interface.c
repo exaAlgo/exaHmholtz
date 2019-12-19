@@ -16,12 +16,12 @@ int main(int argc,char *argv[])
   exaSettings s; exaSettingsInit(h,NULL,&s);
   exaSettingsSet("general::order",getExaInt(2),s);
 
-  exaHmholtz hmhz;
-  exaHmholtzCreate(h,s,&hmhz);
-
   exaMesh mesh;
-  nekSetup(&mesh,"/home/thilina/Repos/NekExamples/b_0001/bb",hmhz);
-  exaMeshSetup(mesh,hmhz);
+  exaMeshRead(&mesh,"/home/thilina/Repos/NekExamples/b_0001/bb",
+    "nek",s);
+
+  exaHmholtz hmhz; exaHmholtzCreate(h,s,&hmhz);
+  exaHmholtzSetup(hmhz);
 
   exaUInt dofs=exaMeshGetLocalDofs(mesh);
   exaInt i;
@@ -53,7 +53,6 @@ int main(int argc,char *argv[])
 
   exaFree(in); exaDestroy(q);
 
-  nekFinalize(mesh);
   exaMeshFinalize(mesh);
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);

@@ -24,6 +24,8 @@ struct exaHmholtz_private{
 };
 
 struct exaMesh_private{
+  exaHandle h;
+
   int ndim,nx1;
   exaInt nelt;
   exaInt nelv;

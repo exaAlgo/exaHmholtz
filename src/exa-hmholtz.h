@@ -13,25 +13,33 @@ typedef struct exaMesh_private *exaMesh;
 int exaHmholtzCreate(exaHandle h,exaSettings s,exaHmholtz *solver);
 int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h);
 int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s);
-int exaHmholtzSetup (exaSettings s,exaHmholtz solver);
-int exaHmholtzOperator(exaVector p,exaVector Ap,exaMesh mesh,
-  exaHmholtz hz);
+int exaHmholtzSetup(exaHmholtz solver);
 int exaHmholtzDestroy(exaHmholtz solver);
 //
 // exaMesh
 //
+int exaMeshRead(exaMesh *mesh,const char *meshName,
+  const char *interface,exaSettings s);
+int exaMeshGetHandle(exaMesh mesh,exaHandle *h);
+int exaMeshSetHandle(exaMesh mesh,exaHandle *h);
 exaInt exaMeshGetElements(exaMesh mesh);
 int exaMeshGet1DDofs(exaMesh mesh);
 int exaMeshGetElementDofs(exaMesh mesh);
 int exaMeshGetLocalDofs(exaMesh mesh);
-int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz);
+int exaMeshGetNGeom(exaMesh mesh);
+int exaMeshGetDim(exaMesh mesh);
 int exaMeshFinalize(exaMesh mesh);
 //
-// mask
+// Hmholtz Operator
+//
+int exaHmholtzOperator(exaVector p,exaVector Ap,exaMesh mesh,
+  exaHmholtz hz);
+//
+// Mask
 //
 int exaApplyMask(exaVector vec,exaVector maskIds,exaHmholtz hz);
 //
-// vector operations
+// Vector Operations
 //
 int exaVectorScaledAdd(exaScalar alpha,exaVector x,exaScalar beta,
   exaVector y,exaHmholtz hz);

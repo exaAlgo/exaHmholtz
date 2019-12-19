@@ -11,8 +11,10 @@
 #include <exa-hmholtz-impl.h>
 #include <nek.h>
 
-int buildNekCase(const char *casename,exaHmholtz hz);
-int nekSetup(exaMesh *mesh,const char *casename,exaHmholtz hz);
+/* public functions */
+int nekSetup(exaMesh mesh,const char *casename,exaSettings s);
 int nekFinalize(exaMesh mesh);
 
+/* private functions; TODO move to private header file */
+int buildNekCase(const char *casename,exaSettings s);
 #endif
