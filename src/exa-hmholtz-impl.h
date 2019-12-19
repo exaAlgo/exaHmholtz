@@ -4,6 +4,8 @@
 #include "exa-hmholtz.h"
 #include "exa-memory.h"
 
+#include <math.h>
+
 #define max(a,b) ((a)>(b)) ? (a) : (b)
 
 struct exaHmholtz_private{
@@ -37,6 +39,9 @@ struct exaMesh_private{
   /* inv degree of a dof */
   exaScalar *rmult;
   exaVector d_rmult;
+
+  /* offsets for geometric factors */
+  exaUInt G00ID,G01ID,G02ID,G11ID,G12ID,G22ID,GWJID;
 
   /* global numbering of dofs */
   exaLong *glo_num;

@@ -259,11 +259,11 @@ int nekSetup(exaMesh mesh,const char *casename,exaSettings s){
 
   double *g11,*g12,*g13,*g22,*g23,*g33,*bm1;
   g11=nek_ptr("g1m1");
-  g12=nek_ptr("g2m1");
-  g13=nek_ptr("g3m1");
-  g22=nek_ptr("g4m1");
-  g23=nek_ptr("g5m1");
-  g33=nek_ptr("g6m1");
+  g12=nek_ptr("g4m1");
+  g13=nek_ptr("g5m1");
+  g22=nek_ptr("g2m1");
+  g23=nek_ptr("g6m1");
+  g33=nek_ptr("g3m1");
   bm1=nek_ptr("bm1");
 
   int nelt=mesh->nelt;
@@ -276,28 +276,28 @@ int nekSetup(exaMesh mesh,const char *casename,exaSettings s){
   if(ndim==3) ndofs*=nx1;
 
   exaUInt size=nelt*ngeom*ndofs;
-  exaMalloc(size,&mesh->geom);
+  exaCalloc(size,&mesh->geom);
 
   exaUInt count,e,g,i;
   if(ndim==2){
     for(e=0;e<nelt;e++){
       for(i=0;i<ndofs;i++){
-        mesh->geom[e*ngeom*ndofs+0*ndofs+i]=g11[i];
-        mesh->geom[e*ngeom*ndofs+1*ndofs+i]=g12[i];
-        mesh->geom[e*ngeom*ndofs+2*ndofs+i]=g22[i];
-        mesh->geom[e*ngeom*ndofs+3*ndofs+i]=bm1[i];//Jacobian
+        mesh->geom[e*ngeom*ndofs+0*ndofs+i]=g11[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+1*ndofs+i]=g12[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+2*ndofs+i]=g22[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+3*ndofs+i]=bm1[e*ndofs+i];//Jacobian
       }
     }
   } else if(ndim==3){
     for(e=0;e<nelt;e++){
       for(i=0;i<ndofs;i++){
-        mesh->geom[e*ngeom*ndofs+0*ndofs+i]=g11[i];
-        mesh->geom[e*ngeom*ndofs+1*ndofs+i]=g12[i];
-        mesh->geom[e*ngeom*ndofs+2*ndofs+i]=g13[i];
-        mesh->geom[e*ngeom*ndofs+3*ndofs+i]=g22[i];
-        mesh->geom[e*ngeom*ndofs+4*ndofs+i]=g23[i];
-        mesh->geom[e*ngeom*ndofs+5*ndofs+i]=g33[i];
-        mesh->geom[e*ngeom*ndofs+6*ndofs+i]=bm1[i];//Jacobian
+        mesh->geom[e*ngeom*ndofs+0*ndofs+i]=g11[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+1*ndofs+i]=g12[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+2*ndofs+i]=g13[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+3*ndofs+i]=g22[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+4*ndofs+i]=g23[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+5*ndofs+i]=g33[e*ndofs+i];
+        mesh->geom[e*ngeom*ndofs+6*ndofs+i]=bm1[e*ndofs+i];//Jacobian
       }
     }
   }

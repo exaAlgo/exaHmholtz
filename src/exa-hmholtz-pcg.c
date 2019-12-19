@@ -5,6 +5,7 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
 {
   exaInt size=exaVectorGetSize(x);
   assert(size==exaVectorGetSize(b));
+  exaScalar *out; exaCalloc(size,&out);
 
   exaVector r =hz->tmp_1;
   exaVector p =hz->tmp_2;
@@ -23,6 +24,8 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
   exaVectorScaledAdd(1.0,b,0.0,r,hz);
   exaVectorScaledAdd(1.0,b,0.0,p,hz);
   exaScalar rdotr=normB;
+  if(verbose)
+    printf("Initial norm: %lf\n",normB);
 
   exaScalar alpha,beta,rdotr0;
 
@@ -30,6 +33,9 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
   while(nIter<maxit && rdotr>TOL){
     //Calculate Ap=A*p
     exaHmholtzOperator(p,Ap,mesh,hz);
+    exaScalar norm=exaVectorWeightedNorm2(mesh->d_rmult,Ap,hz);
+    if(verbose)
+      printf("norm Ap: %lf\n",norm);
 
     exaApplyMask(Ap,mesh->d_maskIds,hz);
 
@@ -47,8 +53,8 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
     beta=rdotr/rdotr0;
 
     if(verbose)
-      printf("niter=%d r0=%.2e r1=%.2e alpha=%.2e beta=%.2e"
-        " pap=%.2e\n",nIter,rdotr0,rdotr,alpha,beta,pAp);
+      printf("niter=%d r0=%.5e r1=%.2e alpha=%.5e beta=%.5e"
+        " pap=%.5e\n",nIter,rdotr0,rdotr,alpha,beta,pAp);
 
     exaVectorScaledAdd(1.0,r,beta,p,hz);
 
@@ -59,6 +65,8 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
   exaDestroy(p );
   exaDestroy(Ap);
   exaDestroy(Ax);
+
+  exaFree(out);
 
   return nIter;
 }

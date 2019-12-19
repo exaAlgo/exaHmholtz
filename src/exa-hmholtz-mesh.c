@@ -22,10 +22,26 @@ int copyDataToDevice(exaMesh mesh){
 
   /* copy geometric factors and derivative matrix */
   exaVectorCreate(h,totalDofs*ngeom,exaScalar_t,&mesh->d_geom);
+#if 1
   exaVectorWrite(mesh->d_geom,mesh->geom);
+#else
+  exaScalar *geom; exaCalloc(totalDofs*ngeom,&geom);
+  for(int i=0;i<totalDofs*ngeom;i++) geom[i]=1.0;
+  exaVectorWrite(mesh->d_geom,geom);
+  exaFree(geom);
+#endif
 
   exaVectorCreate(h,nx1*nx1,exaScalar_t,&mesh->d_D);
+#if 0
   exaVectorWrite(mesh->d_D,mesh->D);
+#else
+  exaScalar *D; exaCalloc(nx1*nx1,&D);
+  for(int i=0;i<nx1;i++)
+    for(int j=0;j<nx1;j++)
+    D[i*nx1+j]=mesh->D[j*nx1+i];
+  exaVectorWrite(mesh->d_D,D);
+  exaFree(D);
+#endif
 
   /*TODO: move setup rotines out of here */
   /* setup gather scatter */
@@ -39,9 +55,15 @@ int copyDataToDevice(exaMesh mesh){
   exaUInt i;
   for(i=0;i<totalDofs;i++)
     mesh->rmult[i]=1.0;
+#if 0
   exaGSOp(mesh->rmult,exaScalar_t,exaAddOp,0,mesh->gs,mesh->buf);
-  for(i=0;i<totalDofs;i++)
+  exaDebug(h,"rmult: ");
+#endif
+  for(i=0;i<totalDofs;i++){
     mesh->rmult[i]=1.0/mesh->rmult[i];
+    exaDebug(h,"%lf ",mesh->rmult[i]);
+  }
+  exaDebug(h,"\n");
 
   /* copy multiplicities to device */
   exaVectorCreate(h,totalDofs,exaScalar_t,&mesh->d_rmult);
@@ -50,19 +72,25 @@ int copyDataToDevice(exaMesh mesh){
   /* setup mask */
   maskID id;
   exaArrayInit(&mesh->maskIds,maskID,10);
+  exaDebug(h,"Masked ids: ");
   for(i=0;i<totalDofs;i++)
     if(fabs(mesh->mask[i])<EXA_TOL){
+      exaDebug(h,"%d ",i);
       id.id=i;
       exaArrayAppend(mesh->maskIds,&id);
     }
+  exaDebug(h,"\n");
 
   exaUInt size=exaArrayGetSize(mesh->maskIds);
 
   exaInt *ids; exaCalloc(size,&ids);
   maskID *ptr=exaArrayGetPointer(mesh->maskIds);
+  exaDebug(h,"Masked ids: ");
   for(i=0;i<size;i++){
     ids[i]=ptr[i].id;
+    exaDebug(h,"%d ",ids[i]);
   }
+  exaDebug(h,"\n");
 
   /* copy masks to device */
   exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
@@ -100,6 +128,10 @@ int exaMeshRead(exaMesh *mesh_,const char *meshName,
     exaSettingsSet("defines::p_G01ID",getExaUInt(1),s);
     exaSettingsSet("defines::p_G11ID",getExaUInt(2),s);
     exaSettingsSet("defines::p_GWJID",getExaUInt(3),s);
+    mesh->G00ID=0;
+    mesh->G01ID=1;
+    mesh->G11ID=2;
+    mesh->GWJID=3;
   }else{
     exaSettingsSet("defines::p_G00ID",getExaUInt(0),s);
     exaSettingsSet("defines::p_G01ID",getExaUInt(1),s);
@@ -108,6 +140,13 @@ int exaMeshRead(exaMesh *mesh_,const char *meshName,
     exaSettingsSet("defines::p_G12ID",getExaUInt(4),s);
     exaSettingsSet("defines::p_G22ID",getExaUInt(5),s);
     exaSettingsSet("defines::p_GWJID",getExaUInt(6),s);
+    mesh->G00ID=0;
+    mesh->G01ID=1;
+    mesh->G02ID=2;
+    mesh->G11ID=3;
+    mesh->G12ID=4;
+    mesh->G22ID=5;
+    mesh->GWJID=6;
   }
 
   copyDataToDevice(mesh);
@@ -165,7 +204,7 @@ int exaMeshGetLocalDofs(exaMesh mesh){
 
 int exaMeshGetNGeom(exaMesh mesh){
   int ndim=mesh->ndim;
-  return (ndim*(ndim+1))/2;
+  return (ndim*(ndim+1))/2+1;
 }
 
 int exaMeshGetDim(exaMesh mesh){

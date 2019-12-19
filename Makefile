@@ -22,7 +22,7 @@ EXAMPLESDIR  = examples
 INTERFACESDIR= interfaces
 TESTSDIR     = tests
 
-LDFLAGS += -L$(EXADIR)/lib -lexa
+LDFLAGS += -L$(EXADIR)/lib -lexa -lm
 incflags = -I$(EXADIR)/include -I$(INTERFACESDIR)/nek
 libname  = exaHmholtz
 
