@@ -6,7 +6,48 @@ typedef struct{
   exaInt id;
 } maskID;
 
-int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
+int buildKernels(exaMesh mesh,exaHmholtz hmhz){
+  exaHandle   h; exaHmholtzGetHandle  (hmhz,&h);
+  exaSettings s; exaHmholtzGetSettings(hmhz,&s);
+
+  const char *installDir,*kernelDir;
+  exaSettingsGet(&installDir,"hmholtz::install_dir",s);
+  exaSettingsGet(&kernelDir ,"hmholtz::kernel_dir ",s);
+
+  char fname[BUFSIZ]; strcpy(fname,installDir);
+  int pathLength=strlen(installDir);
+  strcpy(fname+pathLength,kernelDir);
+  pathLength+=strlen(kernelDir);
+
+  strcpy(fname+pathLength,"/vector");
+  exaDebug(h,"Hmholtz vector kernels=%s\n",fname);
+  exaProgramCreate(h,fname,s,&hmhz->p);
+
+  exaKernelCreate(hmhz->p,"scaledAdd",&hmhz->vectorScaledAdd);
+  exaKernelCreate(hmhz->p,"weightedInnerProduct2",
+    &hmhz->vectorWeightedInnerProduct2);
+  exaKernelCreate(hmhz->p,"innerProduct2",
+    &hmhz->vectorInnerProduct2);
+  exaKernelCreate(hmhz->p,"weightedNorm2",
+    &hmhz->vectorWeightedNorm2);
+  exaProgramFree(hmhz->p);
+
+  strcpy(fname+pathLength,"/mask");
+  exaDebug(h,"Hmholtz mask kernels=%s\n",fname);
+  exaProgramCreate(h,fname,s,&hmhz->p);
+  exaKernelCreate(hmhz->p,"mask",&hmhz->mask);
+  exaProgramFree(hmhz->p);
+
+  strcpy(fname+pathLength,"/hmholtz");
+  exaDebug(h,"Hmholtz operator kernel=%s\n",fname);
+  exaProgramCreate(h,fname,s,&hmhz->p);
+  exaKernelCreate(hmhz->p,"BK5",&hmhz->hmholtzAx);
+  exaProgramFree(hmhz->p);
+
+  return 0;
+}
+
+int copyDataToDevice(exaMesh mesh,exaHmholtz hmhz){
   exaHandle h;
   exaHmholtzGetHandle(hmhz,&h);
 
@@ -27,10 +68,12 @@ int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
   exaVectorCreate(h,nx1*nx1,exaScalar_t,&mesh->d_D);
   exaVectorWrite(mesh->d_D,mesh->D);
 
+  /*TODO: move setup rotines out of here */
   /* setup gather scatter */
   exaGSSetup(mesh->glo_num,totalDofs,exaGetComm(h),0,0,&mesh->gs);
   exaBufferCreate(&mesh->buf,1024);
-  //TODO: setup global offsets and ids
+
+  /*TODO: setup global offsets and ids */
 
   /* setup multiplicities on host */
   exaMalloc(totalDofs,&mesh->rmult);
@@ -61,9 +104,18 @@ int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
   for(i=0;i<size;i++){
     ids[i]=ptr[i].id;
   }
+
+  /* copy masks to device */
   exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
   exaVectorWrite(mesh->d_maskIds,ids);
   exaFree(ids);
+
+  return 0;
+}
+
+int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
+  copyDataToDevice(mesh,hmhz);
+  buildKernels(mesh,hmhz);
 
   return 0;
 }
@@ -77,6 +129,8 @@ int exaMeshFinalize(exaMesh mesh){
   exaGSFree(mesh->gs);
   exaDestroy(mesh->d_geom);
   exaDestroy(mesh->d_D);
+
+  return 0;
 }
 
 exaInt exaMeshGetElements(exaMesh mesh){
