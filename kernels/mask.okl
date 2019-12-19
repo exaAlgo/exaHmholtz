@@ -1,0 +1,8 @@
+@kernel void mask(const exaUInt N,
+                  @restrict const exaInt *maskIds,
+                  @restrict exaScalar *in)
+{
+  for(exaUInt n=0;n<N;n++;@tile(256,@outer,@inner)){
+    if(n<N) in[maskIds[n]]=0.;
+  }
+}

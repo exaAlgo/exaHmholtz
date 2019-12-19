@@ -43,6 +43,12 @@ int exaHmholtzSetup(exaSettings s,exaHmholtz solver){
     &solver->vectorWeightedNorm2);
   exaProgramFree(solver->p);
 
+  strcpy(fname+strlen(installDir)+strlen(kernelDir),"/mask");
+  exaDebug(h,"Hmholtz mask kernels=%s\n",fname);
+  exaProgramCreate(h,fname,s,&solver->p);
+  exaKernelCreate(solver->p,"mask",&solver->mask);
+  exaProgramFree(solver->p);
+
   ret=getenv("EXA_NEK5000_DIR");
   if(ret==NULL){
     const char *home=getenv("HOME");
@@ -79,6 +85,7 @@ int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h){
 }
 
 int exaHmholtzDestroy(exaHmholtz solver){
+  exaDestroy(solver->mask);
   exaDestroy(solver->vectorScaledAdd);
   exaDestroy(solver->vectorWeightedInnerProduct2);
   exaDestroy(solver->vectorInnerProduct2);

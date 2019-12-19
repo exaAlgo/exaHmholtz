@@ -22,13 +22,39 @@ int main(int argc,char *argv[])
   exaMesh mesh;
   nekSetup(&mesh,"/home/thilina/Repos/NekExamples/b_0001/bb",hmhz);
   exaMeshSetup(mesh,hmhz);
+
+  exaUInt dofs=exaMeshGetLocalDofs(mesh);
+  exaInt i;
+
+#if 0
   printf("nel:%d 1d dofs:%d local dofs:%d\n",
     exaMeshGetElements(mesh),exaMeshGet1DDofs(mesh),
     exaMeshGetLocalDofs(mesh));
 
+  for(i=0;i<dofs;i++)
+    printf("%02lld ",mesh->glo_num[i]);
+  printf("\n");
+  for(i=0;i<dfos;i++)
+    printf("%.2lf %.2lf %.2lf\n",mesh->xm1[i],mesh->ym1[i],
+      mesh->zm1[i]);
+  printf("\n");
+#endif
+
+  exaVector q; exaVectorCreate(h,dofs,exaScalar_t,&q);
+  exaScalar *in; exaMalloc(dofs,&in);
+  for(i=0;i<dofs;i++) in[i]=1.0;
+  exaVectorWrite(q,in);
+
+  exaApplyMask(q,mesh->d_maskIds,hmhz);
+
+  exaVectorRead(q,in);
+  for(i=0;i<dofs;i++)
+    printf("%.2lf ",in[i]);
+
+  exaFree(in); exaDestroy(q);
 
   nekFinalize(mesh);
-
+  exaMeshFinalize(mesh);
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);
 

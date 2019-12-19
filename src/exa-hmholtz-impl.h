@@ -17,6 +17,7 @@ struct exaHmholtz_private{
   exaKernel vectorWeightedInnerProduct2;
   exaKernel vectorInnerProduct2;
   exaKernel vectorScaledAdd;
+  exaKernel mask;
   // device vectors
   exaVector tmp_1,tmp_2,tmp_3,tmp_4,tmp_5;
 };

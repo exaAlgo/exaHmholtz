@@ -25,6 +25,11 @@ int exaMeshGet1DDofs(exaMesh mesh);
 int exaMeshGetElementDofs(exaMesh mesh);
 int exaMeshGetLocalDofs(exaMesh mesh);
 int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz);
+int exaMeshFinalize(exaMesh mesh);
+//
+// mask
+//
+int exaApplyMask(exaVector vec,exaVector maskIds,exaHmholtz hz);
 //
 // vector operations
 //

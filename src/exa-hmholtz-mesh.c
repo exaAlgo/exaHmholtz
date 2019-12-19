@@ -1,7 +1,9 @@
 #include <exa-hmholtz-impl.h>
 
+#include <math.h>
+
 typedef struct{
-  exaLong id;
+  exaInt id;
 } maskID;
 
 int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
@@ -28,6 +30,7 @@ int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
   /* setup gather scatter */
   exaGSSetup(mesh->glo_num,totalDofs,exaGetComm(h),0,0,&mesh->gs);
   exaBufferCreate(&mesh->buf,1024);
+  //TODO: setup global offsets and ids
 
   /* setup multiplicities on host */
   exaMalloc(totalDofs,&mesh->rmult);
@@ -38,7 +41,7 @@ int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
   for(i=0;i<totalDofs;i++)
     mesh->rmult[i]=1.0/mesh->rmult[i];
 
-  /* copy these to device */
+  /* copy multiplicities to device */
   exaVectorCreate(h,totalDofs,exaScalar_t,&mesh->d_rmult);
   exaVectorWrite(mesh->d_rmult,mesh->rmult);
 
@@ -46,18 +49,19 @@ int exaMeshSetup(exaMesh mesh,exaHmholtz hmhz){
   maskID id;
   exaArrayInit(&mesh->maskIds,maskID,10);
   for(i=0;i<totalDofs;i++)
-    if(mesh->mask[i]!=0){
-      id.id=mesh->glo_num[i];
+    if(fabs(mesh->mask[i])<EXA_TOL){
+      id.id=i;
       exaArrayAppend(mesh->maskIds,&id);
     }
 
   exaUInt size=exaArrayGetSize(mesh->maskIds);
-  exaLong *ids; exaCalloc(size,&ids);
+
+  exaInt *ids; exaCalloc(size,&ids);
   maskID *ptr=exaArrayGetPointer(mesh->maskIds);
   for(i=0;i<size;i++){
     ids[i]=ptr[i].id;
   }
-  exaVectorCreate(h,size,exaLong_t,&mesh->d_maskIds);
+  exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
   exaVectorWrite(mesh->d_maskIds,ids);
   exaFree(ids);
 
