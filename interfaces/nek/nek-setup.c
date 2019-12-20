@@ -35,7 +35,7 @@ void mkSIZE(exaHandle h,int lx1,int lxd,exaInt lelt,exaLong lelg,
     exit(EXIT_FAILURE);
   }
 
-  char *line; exaCalloc(BUFSIZ,&line);
+  char *line; exaCalloc(BUFSIZ,&line); size_t len=BUFSIZ;
   int count = 0;
   while(fgets(line,BUFSIZ,fp)!=NULL){
     if(strstr(line, "parameter (lx1=") != NULL) {
@@ -72,7 +72,6 @@ void mkSIZE(exaHandle h,int lx1,int lxd,exaInt lelt,exaLong lelg,
   fp=fopen(fname,"r");
 
   int writeSize=0,oldVal;
-  size_t len;
   if(fp!=NULL) {
     while(getline((char**)&line,&len,fp)>0) {
       if(strstr(line,"lelg=")!=NULL) {
