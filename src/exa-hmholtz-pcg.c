@@ -42,7 +42,7 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
     exaScalar pAp=exaVectorInnerProduct2(p,Ap,hz);
     alpha=rdotr/pAp;
 
-    //dssum for multi-element cases
+    //TODO: dssum for multi-element cases
     //exaDsSum(Ap,mesh,hmhz);
 
     exaVectorScaledAdd(alpha     ,p ,1.0,x,hz);
