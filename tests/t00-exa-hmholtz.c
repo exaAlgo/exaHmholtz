@@ -12,7 +12,7 @@ int main(int argc,char *argv[])
   exaHandle h;
   exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
-  exaSettings s; exaSettingsInit(h,NULL,&s);
+  exaSettings s; exaSettingsCreate(h,NULL,&s);
 
   exaHmholtz hmhz;
   exaHmholtzCreate(h,s,&hmhz);

@@ -13,7 +13,7 @@ int main(int argc,char *argv[])
   exaHandle h;
   exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
-  exaSettings s; exaSettingsInit(h,NULL,&s);
+  exaSettings s; exaSettingsCreate(h,NULL,&s);
   exaSettingsSet("general::order",getExaInt(2),s);
 
   exaMesh mesh;
@@ -47,13 +47,13 @@ int main(int argc,char *argv[])
 
   exaApplyMask(q,mesh->d_maskIds,hmhz);
 
-  exaVectorRead(q,in);
+  exaScalar *out; exaVectorRead(q,(void**)&out);
   for(i=0;i<dofs;i++)
-    printf("%.2lf ",in[i]);
+    printf("%.2lf ",out[i]);
 
   exaFree(in); exaDestroy(q);
 
-  exaMeshFinalize(mesh);
+  exaMeshDestroy(mesh);
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);
 

@@ -27,8 +27,8 @@ int main(int argc,char *argv[])
 
   exaHandle h; exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
-  exaSettings s; exaSettingsInit(h,NULL,&s);
-  exaSettingsSet("general::order",getExaInt(2),s);
+  exaSettings s; exaSettingsCreate(h,NULL,&s);
+  exaSettingsSet("general::order",getExaInt(10),s);
 
   exaHmholtz hmhz; exaHmholtzCreate(h,s,&hmhz);
   exaHmholtzSetup(hmhz);
@@ -70,12 +70,12 @@ int main(int argc,char *argv[])
   assert(nIter<=size);
 
   // compare answer
-  exaScalar *out; exaCalloc(size,&out); exaVectorRead(x,out);
+  exaScalar *out; exaVectorRead(x,(void**)&out);
   for(i=0;i<size;i++)
     if(fabs(out[i]-xx[i])>1e-7)
       fprintf(stderr,"Error: %lf != %lf\n",out[i],xx[i]);
 
-  exaFree(xx); exaFree(A); exaFree(Axx); exaFree(in); exaFree(out);
+  exaFree(xx); exaFree(A); exaFree(Axx); exaFree(in);
   exaDestroy(Amatrix); exaDestroy(x); exaDestroy(b);
   exaDestroy(s); exaDestroy(kernelAx);
 

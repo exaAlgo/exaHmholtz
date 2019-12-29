@@ -31,8 +31,7 @@ exaScalar exaVectorInnerProduct2(exaVector x,exaVector y,
 
   exaKernelRun(hz->vectorInnerProduct2,getExaUInt(size),x,y,out);
 
-  exaScalar *result; exaCalloc(nBlocks,&result);
-  exaVectorRead(out,result);
+  exaScalar *result; exaVectorRead(out,(void**)&result);
 
   exaScalar t=0;
   for(int i=0;i<nBlocks;i++)
@@ -40,7 +39,6 @@ exaScalar exaVectorInnerProduct2(exaVector x,exaVector y,
 
   exaGop(h,&t,1,exaScalar_t,exaAddOp);
 
-  exaFree(result);
   exaDestroy(out);
 
   return t;
@@ -67,8 +65,7 @@ exaScalar exaVectorWeightedInnerProduct2(exaVector weights,
   exaKernelRun(hz->vectorWeightedInnerProduct2,getExaUInt(size),
     weights,x,y,out);
 
-  exaScalar *result; exaCalloc(nBlocks,&result);
-  exaVectorRead(out,result);
+  exaScalar *result; exaVectorRead(out,(void**)&result);
 
   exaScalar t=0;
   for(int i=0;i<nBlocks;i++)

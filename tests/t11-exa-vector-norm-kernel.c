@@ -17,8 +17,8 @@ int main(int argc,char *argv[])
   exaHandle h;
   exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
-  exaSettings s; exaSettingsInit(h,NULL,&s);
-  exaSettingsSet("general::order",getExaInt(2),s);
+  exaSettings s; exaSettingsCreate(h,NULL,&s);
+  exaSettingsSet("general::order",getExaInt(10),s);
 
   exaHmholtz hmhz;
   exaHmholtzCreate(h,s,&hmhz);

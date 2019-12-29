@@ -15,7 +15,7 @@ int main(int argc,char *argv[])
   exaHandle h;
   exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
-  exaSettings s; exaSettingsInit(h,NULL,&s);
+  exaSettings s; exaSettingsCreate(h,NULL,&s);
   exaSettingsSet("general::order",getExaInt(10),s);
 
   exaHmholtz hmhz; exaHmholtzCreate(h,s,&hmhz);
@@ -50,12 +50,12 @@ int main(int argc,char *argv[])
 
   exaHmholtzCG(x,b,mesh,1e-8,1000,1,hmhz);
 
-  exaScalar *out; exaMalloc(size,&out);
-  exaVectorRead(x,out);
+  exaScalar *out; exaVectorRead(x,(void**)&out);
   for(i=0;i<size;i++)
     if(fabs(sol[i]-out[i])>1e-7)
       fprintf(stderr,"error: %lf != %lf\n",sol[i],out[i]);
-  exaFree(in); exaFree(sol); exaFree(out);
+
+  exaFree(in); exaFree(sol);
 
   exaDestroy(b); exaDestroy(x);
 
