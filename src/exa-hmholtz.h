@@ -20,15 +20,25 @@ int exaHmholtzDestroy(exaHmholtz solver);
 //
 int exaMeshRead(exaMesh *mesh,const char *meshName,
   const char *interface,exaSettings s);
+int exaMeshCreate(exaMesh *mesh,exaSettings s);
+
 int exaMeshGetHandle(exaMesh mesh,exaHandle *h);
 int exaMeshSetHandle(exaMesh mesh,exaHandle *h);
+
 exaInt exaMeshGetElements(exaMesh mesh);
+int exaMeshSetElements(exaMesh mesh,exaInt nelem);
+
 int exaMeshGet1DDofs(exaMesh mesh);
-int exaMeshGetElementDofs(exaMesh mesh);
+int exaMeshSet1DDofs(exaMesh mesh,int nx1);
+
+int exaMeshGetDim(exaMesh mesh);
+int exaMeshSetDim(exaMesh mesh,int dim);
+
+int exaMeshGetDofsPerElement(exaMesh mesh);
 int exaMeshGetLocalDofs(exaMesh mesh);
 int exaMeshGetNGeom(exaMesh mesh);
-int exaMeshGetDim(exaMesh mesh);
-int exaMeshFinalize(exaMesh mesh);
+
+int exaMeshDestroy(exaMesh mesh);
 //
 // Hmholtz Operator
 //

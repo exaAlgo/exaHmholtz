@@ -54,7 +54,7 @@ int main(int argc,char *argv[])
   exaDestroy(vec1);
   exaDestroy(vec2);
 
-  exaMeshFinalize(mesh);
+  exaMeshDestroy(mesh);
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);
 

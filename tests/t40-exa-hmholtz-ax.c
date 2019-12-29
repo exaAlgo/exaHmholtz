@@ -34,7 +34,7 @@ int main(int argc,char *argv[])
   exaScalar *in,*sol; exaCalloc(size,&in); exaCalloc(size,&sol);
   exaVectorWrite(x,in);
 
-  exaUInt ndofs=exaMeshGetElementDofs(mesh);
+  exaUInt ndofs=exaMeshGetDofsPerElement(mesh);
   exaInt i;
   for(i=0;i<size;i++){
     exaScalar xi =mesh->xm1[i];
@@ -59,6 +59,7 @@ int main(int argc,char *argv[])
 
   exaDestroy(b); exaDestroy(x);
 
+  exaMeshDestroy(mesh);
   exaHmholtzDestroy(hmhz);
   exaDestroy(s);
   exaFinalize(h);

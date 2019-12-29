@@ -79,7 +79,7 @@ int main(int argc,char *argv[])
   exaDestroy(Amatrix); exaDestroy(x); exaDestroy(b);
   exaDestroy(s); exaDestroy(kernelAx);
 
-  exaMeshFinalize(mesh);
+  exaMeshDestroy(mesh);
   exaHmholtzDestroy(hmhz);
   exaFinalize(h);
 

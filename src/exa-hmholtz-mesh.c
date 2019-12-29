@@ -107,13 +107,15 @@ int exaMeshRead(exaMesh *mesh_,const char *meshName,
   exaHandle h; exaSettingsGetHandle(s,&h);
   exaMeshSetHandle(mesh,&h);
 
+#if 0
   if(strcmp(interface,"nek")==0){
     nekSetup(mesh,meshName,s);
   }
+#endif
 
   //TODO: Fix following
   int nx1=exaMeshGet1DDofs(mesh);
-  int elemDofs=exaMeshGetElementDofs(mesh);
+  int elemDofs=exaMeshGetDofsPerElement(mesh);
   int ngeom=exaMeshGetNGeom(mesh);
 
   //p_Nggeo,p_Np
@@ -154,17 +156,59 @@ int exaMeshRead(exaMesh *mesh_,const char *meshName,
   return 0;
 }
 
+int exaMeshCreate(exaMesh *mesh,exaSettings s){
+  return 0;
+}
+
 int exaMeshSetHandle(exaMesh mesh,exaHandle *h){
   mesh->h=*h;
   return 0;
 }
-
 int exaMeshGetHandle(exaMesh mesh,exaHandle *h){
   *h=mesh->h;
   return 0;
 }
 
-int exaMeshFinalize(exaMesh mesh){
+exaInt exaMeshGetElements(exaMesh mesh){
+  return mesh->nelt;
+}
+int exaMeshSetElements(exaMesh mesh,exaInt nelem){
+  mesh->nelt=nelem;
+  return 0;
+}
+
+int exaMeshGetDim(exaMesh mesh){
+  return mesh->ndim;
+}
+int exaMeshSetDim(exaMesh mesh,int dim){
+  mesh->ndim=dim;
+  return 0;
+}
+
+int exaMeshGet1DDofs(exaMesh mesh){
+  return mesh->nx1;
+}
+int exaMeshSet1DDofs(exaMesh mesh,int nx1){
+  mesh->nx1=nx1;
+  return 0;
+}
+
+int exaMeshGetDofsPerElement(exaMesh mesh){
+  int dofs=mesh->nx1;
+  return (mesh->ndim==2) ? dofs*dofs : dofs*dofs*dofs;
+}
+
+int exaMeshGetLocalDofs(exaMesh mesh){
+  exaInt nelt=mesh->nelt;
+  return nelt*exaMeshGetDofsPerElement(mesh);
+}
+
+int exaMeshGetNGeom(exaMesh mesh){
+  int ndim=mesh->ndim;
+  return (ndim*(ndim+1))/2+1;
+}
+
+int exaMeshDestroy(exaMesh mesh){
   exaDestroy(mesh->d_maskIds);
   exaDestroy(mesh->maskIds);
 
@@ -181,32 +225,4 @@ int exaMeshFinalize(exaMesh mesh){
   exaFree(mesh);
 
   return 0;
-}
-
-exaInt exaMeshGetElements(exaMesh mesh){
-  return mesh->nelt;
-}
-
-int exaMeshGet1DDofs(exaMesh mesh){
-  return mesh->nx1;
-}
-
-int exaMeshGetElementDofs(exaMesh mesh){
-  int dofs=mesh->nx1;
-  return (mesh->ndim==2) ? dofs*dofs : dofs*dofs*dofs;
-}
-
-int exaMeshGetLocalDofs(exaMesh mesh){
-  int dofs=mesh->nx1;
-  exaInt nelt=mesh->nelt;
-  return (mesh->ndim==2) ? dofs*dofs*nelt : dofs*dofs*dofs*nelt;
-}
-
-int exaMeshGetNGeom(exaMesh mesh){
-  int ndim=mesh->ndim;
-  return (ndim*(ndim+1))/2+1;
-}
-
-int exaMeshGetDim(exaMesh mesh){
-  return mesh->ndim;
 }
