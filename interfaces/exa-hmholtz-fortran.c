@@ -94,6 +94,29 @@ void fExaMeshSetDim(exaFortranMesh *mesh,int ndim,int *err){
   *err=exaMeshSetDim(exaMeshF2C(*mesh),ndim);
 }
 
+#define fExaMeshGetDofsPerElement\
+  EXA_FORTRAN_NAME(exameshgetdofsperelement,EXAMESHGETDOFSPERELEMENT)
+void fExaMeshGetDofsPerElement(exaFortranMesh *mesh,int *ndofs,
+  int *err)
+{
+  *ndofs=exaMeshGetDofsPerElement(exaMeshF2C(*mesh));
+  *err=0;
+}
+
+#define fExaMeshGetLocalDofs\
+  EXA_FORTRAN_NAME(exameshgetlocaldofs,EXAMESHGETLOCALDOFS)
+void fExaMeshGetLocalDofs(exaFortranMesh *mesh,int *ndofs,int *err){
+  *ndofs=exaMeshGetLocalDofs(exaMeshF2C(*mesh));
+  *err=0;
+}
+
+#define fExaMeshGetNGeom\
+  EXA_FORTRAN_NAME(exameshgetngeom,EXAMESHGETNGEOM)
+void fExaMeshGetNGeom(exaFortranMesh *mesh,int *ngeom,int *err){
+  *ngeom=exaMeshGetNGeom(exaMeshF2C(*mesh));
+  *err=0;
+}
+
 #define fExaMeshDestroy\
   EXA_FORTRAN_NAME(exameshdestroy,EXAMESHDESTROY)
 void fExaMeshDestroy(exaFortranMesh *mesh,int *err){
