@@ -1,8 +1,12 @@
 #ifndef _EXA_FORTRAN_HMHOLTZ_H_
 #define _EXA_FORTRAN_HMHOLTZ_H_
 
+#include <exa-fortran.h>
+
+typedef int exaFortranMesh;
 typedef int exaFortranHmholtz;
 
-exaHmholtz exaHmholtzF2C(exaFortranHmholtz handle);
+exaMesh exaMeshF2C(exaFortranMesh mesh);
+exaHmholtz exaHmholtzF2C(exaFortranHmholtz hmholtz);
 
 #endif
