@@ -1,10 +1,15 @@
 ## User configurations ###
 # Compilers and flags
 CC ?= mpicc
+FC ?= mpifort
 CFLAGS ?= -O0
+FFLAGS ?= -O0
 CPP ?= cpp
 CPPFLAGS ?=
 LDFLAGS ?=
+
+### Fortran interface ###
+UNDERSCORE ?= 1
 
 # Dependency locations
 EXADIR ?=
@@ -29,13 +34,8 @@ libname  = exaHmholtz
 ### Include template makefile ###
 -include $(EXADIR)/share/exa-base.mk
 
-interfaces.src    = $(wildcard $(INTERFACESDIR)/nek/*.c)
-interfaces.obj    = $(patsubst $(INTERFACESDIR)/nek/%.c,\
-  $(BUILDDIR)/interfaces/nek/%.o,$(interfaces.src))
-obj += $(interfaces.obj)
-
 .PHONY: interfaces
-interfaces: $(interfaces.obj)
+interfaces: interfaces-base
 
 $(BUILDDIR)/interfaces/nek/%.o: $(INTERFACESDIR)/nek/%.c
 	$(compile.c) -I$(INTERFACESDIR)/nek -c $< -o $@
