@@ -7,6 +7,68 @@ typedef struct{
   exaInt id;
 } maskID;
 
+int exaMeshRead(exaMesh *mesh_,const char *meshName,
+  const char *interface,exaSettings s)
+{
+  return 0;
+}
+
+int exaMeshCreate(exaMesh *mesh_,exaSettings s){
+  exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
+  exaHandle h; exaSettingsGetHandle(s,&h);
+  exaMeshSetHandle(mesh,&h);
+
+  return 0;
+}
+
+int exaMeshSetHandle(exaMesh mesh,exaHandle *h){
+  mesh->h=*h;
+  return 0;
+}
+int exaMeshGetHandle(exaMesh mesh,exaHandle *h){
+  *h=mesh->h;
+  return 0;
+}
+
+exaInt exaMeshGetElements(exaMesh mesh){
+  return mesh->nelt;
+}
+int exaMeshSetElements(exaMesh mesh,exaInt nelem){
+  mesh->nelt=nelem;
+  return 0;
+}
+
+int exaMeshGetDim(exaMesh mesh){
+  return mesh->ndim;
+}
+int exaMeshSetDim(exaMesh mesh,int dim){
+  mesh->ndim=dim;
+  return 0;
+}
+
+int exaMeshGet1DDofs(exaMesh mesh){
+  return mesh->nx1;
+}
+int exaMeshSet1DDofs(exaMesh mesh,int nx1){
+  mesh->nx1=nx1;
+  return 0;
+}
+
+int exaMeshGetDofsPerElement(exaMesh mesh){
+  int dofs=mesh->nx1;
+  return (mesh->ndim==2) ? dofs*dofs : dofs*dofs*dofs;
+}
+
+int exaMeshGetLocalDofs(exaMesh mesh){
+  exaInt nelt=mesh->nelt;
+  return nelt*exaMeshGetDofsPerElement(mesh);
+}
+
+int exaMeshGetNGeom(exaMesh mesh){
+  int ndim=mesh->ndim;
+  return (ndim*(ndim+1))/2+1;
+}
+
 int copyDataToDevice(exaMesh mesh){
   exaHandle h; exaMeshGetHandle(mesh,&h);
 
@@ -100,20 +162,8 @@ int copyDataToDevice(exaMesh mesh){
   return 0;
 }
 
-int exaMeshRead(exaMesh *mesh_,const char *meshName,
-  const char *interface,exaSettings s)
-{
-  exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
-  exaHandle h; exaSettingsGetHandle(s,&h);
-  exaMeshSetHandle(mesh,&h);
-
-#if 0
-  if(strcmp(interface,"nek")==0){
-    nekSetup(mesh,meshName,s);
-  }
-#endif
-
-  //TODO: Fix following
+int exaMeshSetup(exaMesh mesh,exaSettings s){
+  //set nx1
   int nx1=exaMeshGet1DDofs(mesh);
   int elemDofs=exaMeshGetDofsPerElement(mesh);
   int ngeom=exaMeshGetNGeom(mesh);
@@ -154,58 +204,6 @@ int exaMeshRead(exaMesh *mesh_,const char *meshName,
   copyDataToDevice(mesh);
 
   return 0;
-}
-
-int exaMeshCreate(exaMesh *mesh,exaSettings s){
-  return 0;
-}
-
-int exaMeshSetHandle(exaMesh mesh,exaHandle *h){
-  mesh->h=*h;
-  return 0;
-}
-int exaMeshGetHandle(exaMesh mesh,exaHandle *h){
-  *h=mesh->h;
-  return 0;
-}
-
-exaInt exaMeshGetElements(exaMesh mesh){
-  return mesh->nelt;
-}
-int exaMeshSetElements(exaMesh mesh,exaInt nelem){
-  mesh->nelt=nelem;
-  return 0;
-}
-
-int exaMeshGetDim(exaMesh mesh){
-  return mesh->ndim;
-}
-int exaMeshSetDim(exaMesh mesh,int dim){
-  mesh->ndim=dim;
-  return 0;
-}
-
-int exaMeshGet1DDofs(exaMesh mesh){
-  return mesh->nx1;
-}
-int exaMeshSet1DDofs(exaMesh mesh,int nx1){
-  mesh->nx1=nx1;
-  return 0;
-}
-
-int exaMeshGetDofsPerElement(exaMesh mesh){
-  int dofs=mesh->nx1;
-  return (mesh->ndim==2) ? dofs*dofs : dofs*dofs*dofs;
-}
-
-int exaMeshGetLocalDofs(exaMesh mesh){
-  exaInt nelt=mesh->nelt;
-  return nelt*exaMeshGetDofsPerElement(mesh);
-}
-
-int exaMeshGetNGeom(exaMesh mesh){
-  int ndim=mesh->ndim;
-  return (ndim*(ndim+1))/2+1;
 }
 
 int exaMeshDestroy(exaMesh mesh){

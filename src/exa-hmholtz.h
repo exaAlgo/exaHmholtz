@@ -38,6 +38,8 @@ int exaMeshGetDofsPerElement(exaMesh mesh);
 int exaMeshGetLocalDofs(exaMesh mesh);
 int exaMeshGetNGeom(exaMesh mesh);
 
+int exaMeshSetup(exaMesh mesh,exaSettings s);
+
 int exaMeshDestroy(exaMesh mesh);
 //
 // Hmholtz Operator
