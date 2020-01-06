@@ -10,10 +10,11 @@ typedef struct exaMesh_private *exaMesh;
 //
 // exaHmholtz
 //
-int exaHmholtzCreate(exaHandle h,exaSettings s,exaHmholtz *solver);
+int exaHmholtzCreate(exaHmholtz *solver,exaHandle h);
 int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h);
+int exaHmholtzSetHandle(exaHmholtz solver,exaHandle *h);
 int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s);
-int exaHmholtzSetup(exaHmholtz solver);
+int exaHmholtzSetup(exaHmholtz solver,exaSettings s,exaMesh mesh);
 int exaHmholtzDestroy(exaHmholtz solver);
 //
 // exaMesh

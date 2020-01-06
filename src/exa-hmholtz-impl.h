@@ -9,7 +9,9 @@
 #define max(a,b) ((a)>(b)) ? (a) : (b)
 
 struct exaHmholtz_private{
+  // exaHandle
   exaHandle h;
+  // exaSettings
   exaSettings s;
   // program
   exaProgram p;

@@ -2,6 +2,36 @@
 //
 // exaHmholtz
 //
+int exaHmholtzCreate(exaHmholtz *solver_,exaHandle h){
+  exaMalloc(1,solver_); exaHmholtz solver=*solver_;
+
+  exaHmholtzSetHandle(solver,&h);
+
+  solver->Ax=NULL;
+  solver->vectorWeightedNorm2=NULL;
+  solver->vectorWeightedInnerProduct2=NULL;
+  solver->vectorInnerProduct2=NULL;
+  solver->vectorScaledAdd=NULL;
+  solver->mask=NULL;
+  solver->hmholtzAx=NULL;
+
+  return 0;
+}
+
+int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s){
+  *s=solver->s;
+  return 0;
+}
+
+int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h){
+  *h=solver->h;
+  return 0;
+}
+int exaHmholtzSetHandle(exaHmholtz solver,exaHandle *h){
+  solver->h=*h;
+  return 0;
+}
+
 static const char *kernelDir="/kernels";
 static const char *interfaceDir="/interfaces";
 
@@ -44,38 +74,8 @@ int setupSettings(exaSettings s,exaHmholtz solver){
   return 0;
 }
 
-int exaHmholtzCreate(exaHandle h,exaSettings s,exaHmholtz *solver_){
-  exaMalloc(1,solver_);
-
-  exaHmholtz solver=*solver_;
-  solver->h=h;
-
-  setupSettings(s,solver);
-
-  solver->Ax=NULL;
-  solver->vectorWeightedNorm2=NULL;
-  solver->vectorWeightedInnerProduct2=NULL;
-  solver->vectorInnerProduct2=NULL;
-  solver->vectorScaledAdd=NULL;
-  solver->mask=NULL;
-  solver->hmholtzAx=NULL;
-
-  return 0;
-}
-
-int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s){
-  *s=solver->s;
-  return 0;
-}
-
-int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h){
-  *h=solver->h;
-  return 0;
-}
-
-int buildKernels(exaHmholtz hmhz){
-  exaHandle   h; exaHmholtzGetHandle  (hmhz,&h);
-  exaSettings s; exaHmholtzGetSettings(hmhz,&s);
+int buildKernels(exaSettings s,exaHmholtz hmhz){
+  exaHandle h; exaHmholtzGetHandle(hmhz,&h);
 
   const char *kernelDir;
   exaSettingsGet(&kernelDir,"hmholtz::kernel_dir",s);
@@ -112,8 +112,9 @@ int buildKernels(exaHmholtz hmhz){
   return 0;
 }
 
-int exaHmholtzSetup(exaHmholtz solver){
-  buildKernels(solver);
+int exaHmholtzSetup(exaHmholtz solver,exaSettings s,exaMesh mesh){
+  setupSettings(s,solver);
+  buildKernels(s,solver);
 
   return 0;
 }
