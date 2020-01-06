@@ -19,10 +19,7 @@ int exaHmholtzDestroy(exaHmholtz solver);
 //
 // exaMesh
 //
-int exaMeshRead(exaMesh *mesh,const char *meshName,
-  const char *interface,exaSettings s);
-int exaMeshCreate(exaMesh *mesh,exaSettings s);
-
+int exaMeshCreate(exaMesh *mesh,const char *meshFile,exaHandle h);
 int exaMeshGetHandle(exaMesh mesh,exaHandle *h);
 int exaMeshSetHandle(exaMesh mesh,exaHandle *h);
 

@@ -14,7 +14,7 @@ int main(int argc,char *argv[])
 
   exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
 
-  exaMesh mesh; exaMeshCreate(&mesh,h);
+  exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
   exaMeshDestroy(mesh);
 
   exaHmholtzDestroy(hmhz);

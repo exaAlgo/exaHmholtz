@@ -29,11 +29,11 @@ struct exaHmholtz_private{
 
 struct exaMesh_private{
   exaHandle h;
+  int isSetup;
 
   int ndim,nx1;
   exaInt nelt;
   exaInt nelv;
-  exaInt lelt;
 
   /* x,y and z co-ordinates of mesh points */
   exaScalar *xm1 ,*ym1 ,*zm1;
@@ -61,7 +61,6 @@ struct exaMesh_private{
 
   exaScalar *geom;
   exaVector d_geom;
-  int ngeom;
 
   exaScalar *D;
   exaVector d_D;

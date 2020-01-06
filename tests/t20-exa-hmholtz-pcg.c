@@ -28,10 +28,12 @@ int main(int argc,char *argv[])
   exaHandle h; exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
   exaSettings s; exaSettingsCreate(h,NULL,&s);
-  exaSettingsSet("general::order",getExaInt(10),s);
 
-  exaHmholtz hmhz; exaHmholtzCreate(h,s,&hmhz);
-  exaHmholtzSetup(hmhz);
+  exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
+  exaMeshSetup(mesh,s);
+
+  exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
+  exaHmholtzSetup(hmhz,s,mesh);
 
   exaProgram p; exaProgramCreate(h,argv[0],s,&p);
   exaKernelCreate(p,"Ax",&kernelAx);
@@ -79,8 +81,8 @@ int main(int argc,char *argv[])
   exaDestroy(Amatrix); exaDestroy(x); exaDestroy(b);
   exaDestroy(s); exaDestroy(kernelAx);
 
-  exaMeshDestroy(mesh);
   exaHmholtzDestroy(hmhz);
+  exaMeshDestroy(mesh);
   exaFinalize(h);
 
   MPI_Finalize();

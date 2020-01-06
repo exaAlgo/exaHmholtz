@@ -18,13 +18,11 @@ int main(int argc,char *argv[])
   exaSettings s; exaSettingsCreate(h,NULL,&s);
   exaSettingsSet("general::order",getExaInt(10),s);
 
-  exaHmholtz hmhz; exaHmholtzCreate(h,s,&hmhz);
+  exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
+  exaMeshSetup(mesh,s);
 
-  exaMesh mesh;
-  exaMeshRead(&mesh,"/home/thilina/Repos/NekExamples/b_0001/bb",
-    "nek",s);
-
-  exaHmholtzSetup(hmhz);
+  exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
+  exaHmholtzSetup(hmhz,s,mesh);
 
   // create x with zero initial guess and rhs with sin function
   exaVector x,b; exaUInt size=exaMeshGetLocalDofs(mesh);

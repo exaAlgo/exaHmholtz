@@ -7,16 +7,15 @@ typedef struct{
   exaInt id;
 } maskID;
 
-int exaMeshRead(exaMesh *mesh_,const char *meshName,
-  const char *interface,exaSettings s)
-{
-  return 0;
-}
-
-int exaMeshCreate(exaMesh *mesh_,exaSettings s){
+int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
   exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
-  exaHandle h; exaSettingsGetHandle(s,&h);
+
+  //TODO: read the mesh from mesh file
+  // meshRead(mesh,meshFile);
+
   exaMeshSetHandle(mesh,&h);
+
+  mesh->isSetup=0;
 
   return 0;
 }
@@ -72,15 +71,12 @@ int exaMeshGetNGeom(exaMesh mesh){
 int copyDataToDevice(exaMesh mesh){
   exaHandle h; exaMeshGetHandle(mesh,&h);
 
-  int nelt =mesh->nelt;
-  int ndim =mesh->ndim;
-  int ngeom=mesh->ngeom;
+  int nelt=exaMeshGetElements(mesh);
+  int ndim=exaMeshGetDim(mesh);
+  int nx1 =exaMeshGet1DDofs(mesh);
+  int ngeom=exaMeshGetNGeom(mesh);
 
-  int nx1=mesh->nx1;
-  exaUInt ndofs=nx1*nx1;
-  if(ndim==3) ndofs*=nx1;
-
-  exaUInt totalDofs=ndofs*nelt;
+  exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
 
   /* copy geometric factors and derivative matrix */
   exaVectorCreate(h,totalDofs*ngeom,exaScalar_t,&mesh->d_geom);
@@ -163,8 +159,9 @@ int copyDataToDevice(exaMesh mesh){
 }
 
 int exaMeshSetup(exaMesh mesh,exaSettings s){
-  //set nx1
-  int nx1=exaMeshGet1DDofs(mesh);
+  int order; exaSettingsGet(&order,"general::oder",s);
+  int nx1=order+1; exaMeshSet1DDofs(mesh,nx1);
+
   int elemDofs=exaMeshGetDofsPerElement(mesh);
   int ngeom=exaMeshGetNGeom(mesh);
 
@@ -201,12 +198,15 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
     mesh->GWJID=6;
   }
 
+#if 0
   copyDataToDevice(mesh);
+#endif
 
   return 0;
 }
 
 int exaMeshDestroy(exaMesh mesh){
+#if 0
   exaDestroy(mesh->d_maskIds);
   exaDestroy(mesh->maskIds);
 
@@ -220,6 +220,8 @@ int exaMeshDestroy(exaMesh mesh){
   exaDestroy(mesh->d_geom);
 
   exaDestroy(mesh->d_D);
+#endif
+
   exaFree(mesh);
 
   return 0;

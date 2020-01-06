@@ -73,7 +73,6 @@ exaScalar exaVectorWeightedInnerProduct2(exaVector weights,
 
   exaGop(h,&t,1,exaScalar_t,exaAddOp);
 
-  exaFree(result);
   exaDestroy(out);
 
   return t;
