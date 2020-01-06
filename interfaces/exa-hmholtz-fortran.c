@@ -11,17 +11,17 @@ static int hmholtzMax=0;
 
 #define fExaHmholtzCreate\
   EXA_FORTRAN_NAME(exahmholtzcreate,EXAHMHOLTZCREATE)
-void fExaHmholtzCreate(exaFortranHandle *exa,exaFortranSettings *s,
+void fExaHmholtzCreate(exaFortranHandle *h,
   exaFortranHmholtz *hmhz,int *err)
 {
   if(hmholtzCurrent==hmholtzMax)
     hmholtzMax+=hmholtzMax/2+1,exaRealloc(hmholtzMax,&hmholtzDict);
 
-  *err=exaHmholtzCreate(exaHandleF2C(*exa),exaSettingsF2C(*s),
-    &hmholtzDict[hmholtzCurrent]);
+  *err=exaHmholtzCreate(&hmholtzDict[hmholtzCurrent],
+    exaHandleF2C(*h));
 
   if(*err==0)
-    *exa=hmholtzCurrent++,hmholtzActive++;
+    *hmhz=hmholtzCurrent++,hmholtzActive++;
 }
 
 #define fExaHmholtzDestroy\
@@ -43,13 +43,16 @@ static int meshMax=0;
 
 #define fExaMeshCreate\
   EXA_FORTRAN_NAME(exameshcreate,EXAMESHCREATE)
-void fExaMeshCreate(exaFortranMesh *mesh,exaFortranSettings *s,
-  int *err)
+void fExaMeshCreate(exaFortranMesh *mesh,const char *meshFile,
+  exaFortranHandle *exa,int *err,fortran_charlen_t meshFile_len)
 {
+  EXA_FIX_STRING(meshFile);
+
   if(meshCurrent==meshMax)
     meshMax+=meshMax/2+1,exaRealloc(meshMax,&meshDict);
 
-  *err=exaMeshCreate(&meshDict[meshCurrent],exaSettingsF2C(*s));
+  *err=exaMeshCreate(&meshDict[meshCurrent],
+    strlen(meshFile_c)>0?meshFile_c:NULL,exaHandleF2C(*exa));
 
   if(*err==0)
     *mesh=meshCurrent++,meshActive++;
