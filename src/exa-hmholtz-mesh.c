@@ -1,6 +1,4 @@
 #include <exa-hmholtz-impl.h>
-#include <nek-setup.h>
-
 #include <math.h>
 
 typedef struct{

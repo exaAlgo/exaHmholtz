@@ -1,5 +1,6 @@
 #include "exa-hmholtz.h"
 #include "exa-memory.h"
+#include "exa-tests.h"
 
 #include <math.h>
 #include <time.h>
@@ -35,7 +36,8 @@ int main(int argc,char *argv[])
   exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
   exaHmholtzSetup(hmhz,s,mesh);
 
-  exaProgram p; exaProgramCreate(h,argv[0],s,&p);
+  char oklName[BUFSIZ]; GET_OKL_NAME(oklName,argv[0]);
+  exaProgram p; exaProgramCreate(h,oklName,s,&p);
   exaKernelCreate(p,"Ax",&kernelAx);
 
   // Set answer
