@@ -11,8 +11,8 @@ static int hmholtzMax=0;
 
 #define fExaHmholtzCreate\
   EXA_FORTRAN_NAME(exahmholtzcreate,EXAHMHOLTZCREATE)
-void fExaHmholtzCreate(exaFortranHandle *h,
-  exaFortranHmholtz *hmhz,int *err)
+void fExaHmholtzCreate(exaFortranHmholtz *hmhz,
+  exaFortranHandle *h,int *err)
 {
   if(hmholtzCurrent==hmholtzMax)
     hmholtzMax+=hmholtzMax/2+1,exaRealloc(hmholtzMax,&hmholtzDict);
