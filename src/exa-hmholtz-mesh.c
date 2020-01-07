@@ -1,10 +1,6 @@
 #include <exa-hmholtz-impl.h>
 #include <math.h>
 
-typedef struct{
-  exaInt id;
-} maskID;
-
 int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
   exaDebug(h,"[meshCreate]\n");
   exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
@@ -67,96 +63,6 @@ int exaMeshGetNGeom(exaMesh mesh){
   return (ndim*(ndim+1))/2+1;
 }
 
-int copyDataToDevice(exaMesh mesh){
-  exaHandle h; exaMeshGetHandle(mesh,&h);
-
-  int nelt=exaMeshGetElements(mesh);
-  int ndim=exaMeshGetDim(mesh);
-  int nx1 =exaMeshGet1DDofs(mesh);
-  int ngeom=exaMeshGetNGeom(mesh);
-
-  exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
-
-  /* copy geometric factors and derivative matrix */
-  exaVectorCreate(h,totalDofs*ngeom,exaScalar_t,&mesh->d_geom);
-#if 1
-  exaVectorWrite(mesh->d_geom,mesh->geom);
-#else
-  exaScalar *geom; exaCalloc(totalDofs*ngeom,&geom);
-  for(int i=0;i<totalDofs*ngeom;i++) geom[i]=1.0;
-  exaVectorWrite(mesh->d_geom,geom);
-  exaFree(geom);
-#endif
-
-  exaVectorCreate(h,nx1*nx1,exaScalar_t,&mesh->d_D);
-#if 0
-  exaVectorWrite(mesh->d_D,mesh->D);
-#else
-  exaScalar *D; exaCalloc(nx1*nx1,&D);
-  for(int i=0;i<nx1;i++)
-    for(int j=0;j<nx1;j++)
-    D[i*nx1+j]=mesh->D[j*nx1+i];
-  exaVectorWrite(mesh->d_D,D);
-  exaFree(D);
-#endif
-
-  /*TODO: move setup rotines out of here */
-  /* setup gather scatter */
-  exaGSSetup(mesh->glo_num,totalDofs,exaGetComm(h),0,0,&mesh->gs);
-  exaBufferCreate(&mesh->buf,1024);
-
-  /*TODO: setup global offsets and ids */
-
-  /* setup multiplicities on host */
-  exaMalloc(totalDofs,&mesh->rmult);
-  exaUInt i;
-  for(i=0;i<totalDofs;i++)
-    mesh->rmult[i]=1.0;
-#if 0
-  exaGSOp(mesh->rmult,exaScalar_t,exaAddOp,0,mesh->gs,mesh->buf);
-  exaDebug(h,"rmult: ");
-#endif
-  for(i=0;i<totalDofs;i++){
-    mesh->rmult[i]=1.0/mesh->rmult[i];
-    exaDebug(h,"%lf ",mesh->rmult[i]);
-  }
-  exaDebug(h,"\n");
-
-  /* copy multiplicities to device */
-  exaVectorCreate(h,totalDofs,exaScalar_t,&mesh->d_rmult);
-  exaVectorWrite(mesh->d_rmult,mesh->rmult);
-
-  /* setup mask */
-  maskID id;
-  exaArrayInit(&mesh->maskIds,maskID,10);
-  exaDebug(h,"Masked ids: ");
-  for(i=0;i<totalDofs;i++)
-    if(fabs(mesh->mask[i])<EXA_TOL){
-      exaDebug(h,"%d ",i);
-      id.id=i;
-      exaArrayAppend(mesh->maskIds,&id);
-    }
-  exaDebug(h,"\n");
-
-  exaUInt size=exaArrayGetSize(mesh->maskIds);
-
-  exaInt *ids; exaCalloc(size,&ids);
-  maskID *ptr=exaArrayGetPointer(mesh->maskIds);
-  exaDebug(h,"Masked ids: ");
-  for(i=0;i<size;i++){
-    ids[i]=ptr[i].id;
-    exaDebug(h,"%d ",ids[i]);
-  }
-  exaDebug(h,"\n");
-
-  /* copy masks to device */
-  exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
-  exaVectorWrite(mesh->d_maskIds,ids);
-  exaFree(ids);
-
-  return 0;
-}
-
 int exaMeshSetup(exaMesh mesh,exaSettings s){
   int order; exaSettingsGet(&order,"general::oder",s);
   int nx1=order+1; exaMeshSet1DDofs(mesh,nx1);
@@ -196,10 +102,6 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
     mesh->G22ID=5;
     mesh->GWJID=6;
   }
-
-#if 0
-  copyDataToDevice(mesh);
-#endif
 
   return 0;
 }
