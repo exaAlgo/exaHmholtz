@@ -6,6 +6,7 @@ typedef struct{
 } maskID;
 
 int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
+  exaDebug(h,"[meshCreate]\n");
   exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
 
   //TODO: read the mesh from mesh file
@@ -204,6 +205,8 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
 }
 
 int exaMeshDestroy(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[meshDestroy]\n");
 #if 0
   exaDestroy(mesh->d_maskIds);
   exaDestroy(mesh->maskIds);

@@ -3,6 +3,7 @@
 // exaHmholtz
 //
 int exaHmholtzCreate(exaHmholtz *solver_,exaHandle h){
+  exaDebug(h,"[hmholtzCreate]\n");
   exaMalloc(1,solver_); exaHmholtz solver=*solver_;
 
   exaHmholtzSetHandle(solver,&h);
@@ -119,15 +120,18 @@ int exaHmholtzSetup(exaHmholtz solver,exaSettings s,exaMesh mesh){
   return 0;
 }
 
-int exaHmholtzDestroy(exaHmholtz solver){
-  exaDestroy(solver->hmholtzAx);
-  exaDestroy(solver->mask);
-  exaDestroy(solver->vectorScaledAdd);
-  exaDestroy(solver->vectorWeightedInnerProduct2);
-  exaDestroy(solver->vectorInnerProduct2);
-  exaDestroy(solver->vectorWeightedNorm2);
+int exaHmholtzDestroy(exaHmholtz hmhz){
+  exaHandle h; exaHmholtzGetHandle(hmhz,&h);
+  exaDebug(h,"[hmholtzDestroy]\n");
 
-  exaFree(solver);
+  exaDestroy(hmhz->hmholtzAx);
+  exaDestroy(hmhz->mask);
+  exaDestroy(hmhz->vectorScaledAdd);
+  exaDestroy(hmhz->vectorWeightedInnerProduct2);
+  exaDestroy(hmhz->vectorInnerProduct2);
+  exaDestroy(hmhz->vectorWeightedNorm2);
+
+  exaFree(hmhz);
 
   return 0;
 }
