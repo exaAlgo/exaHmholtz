@@ -58,43 +58,95 @@ void fExaMeshCreate(exaFortranMesh *mesh,const char *meshFile,
     *mesh=meshCurrent++,meshActive++;
 }
 
-#define fExaMeshGetElements\
-  EXA_FORTRAN_NAME(exameshgetelements,EXAMESHGETELEMENTS)
-void fExaMeshGetElements(exaFortranMesh *mesh,int *nelem,int *err){
-  *nelem=exaMeshGetElements(exaMeshF2C(*mesh));
+#define fExaMeshGetNElements\
+  EXA_FORTRAN_NAME(exameshgetnelements,EXAMESHGETNELEMENTS)
+void fExaMeshGetNElements(int *nelem,exaFortranMesh *mesh,int *err){
+  *nelem=exaMeshGetNElements(exaMeshF2C(*mesh));
   *err=0;
 }
 
-#define fExaMeshSetElements\
-  EXA_FORTRAN_NAME(exameshsetelements,EXAMESHSETELEMENTS)
-void fExaMeshSetElements(exaFortranMesh *mesh,int nelem,int *err){
-  *err=exaMeshSetElements(exaMeshF2C(*mesh),nelem);
+#define fExaMeshSetNElements\
+  EXA_FORTRAN_NAME(exameshsetnelements,EXAMESHSETNELEMENTS)
+void fExaMeshSetNElements(exaFortranMesh *mesh,int *nelem,int *err){
+  *err=exaMeshSetNElements(exaMeshF2C(*mesh),*nelem);
 }
 
 #define fExaMeshGet1DDofs\
   EXA_FORTRAN_NAME(exameshget1ddofs,EXAMESHGET1DDOFS)
-void fExaMeshGet1DDofs(exaFortranMesh *mesh,int *nx1,int *err){
+void fExaMeshGet1DDofs(int *nx1,exaFortranMesh *mesh,int *err){
   *nx1=exaMeshGet1DDofs(exaMeshF2C(*mesh));
   *err=0;
 }
 
 #define fExaMeshSet1DDofs\
   EXA_FORTRAN_NAME(exameshset1ddofs,EXAMESHSET1DDOFS)
-void fExaMeshSet1DDofs(exaFortranMesh *mesh,int nx1,int *err){
-  *err=exaMeshSet1DDofs(exaMeshF2C(*mesh),nx1);
+void fExaMeshSet1DDofs(exaFortranMesh *mesh,int *nx1,int *err){
+  *err=exaMeshSet1DDofs(exaMeshF2C(*mesh),*nx1);
 }
 
 #define fExaMeshGetDim\
   EXA_FORTRAN_NAME(exameshgetdim,EXAMESHGETDIM)
-void fExaMeshGetDim(exaFortranMesh *mesh,int *ndim,int *err){
+void fExaMeshGetDim(int *ndim,exaFortranMesh *mesh,int *err){
   *ndim=exaMeshGetDim(exaMeshF2C(*mesh));
   *err=0;
 }
 
 #define fExaMeshSetDim\
   EXA_FORTRAN_NAME(exameshsetdim,EXAMESHSETDIM)
-void fExaMeshSetDim(exaFortranMesh *mesh,int ndim,int *err){
-  *err=exaMeshSetDim(exaMeshF2C(*mesh),ndim);
+void fExaMeshSetDim(exaFortranMesh *mesh,int *ndim,int *err){
+  *err=exaMeshSetDim(exaMeshF2C(*mesh),*ndim);
+}
+
+#define fExaMeshSetXcoords\
+  EXA_FORTRAN_NAME(exameshsetxcoords,EXAMESHSETXCOORDS)
+void fExaMeshSetXcoords(exaFortranMesh *mesh,exaScalar *xc,int *err){
+  *err=exaMeshSetXcoords(exaMeshF2C(*mesh),xc);
+}
+
+#define fExaMeshSetYcoords\
+  EXA_FORTRAN_NAME(exameshsetycoords,EXAMESHSETYCOORDS)
+void fExaMeshSetYcoords(exaFortranMesh *mesh,exaScalar *yc,int *err){
+  *err=exaMeshSetYcoords(exaMeshF2C(*mesh),yc);
+}
+
+#define fExaMeshSetZcoords\
+  EXA_FORTRAN_NAME(exameshsetzcoords,EXAMESHSETZCOORDS)
+void fExaMeshSetZcoords(exaFortranMesh *mesh,exaScalar *zc,int *err){
+  *err=exaMeshSetZcoords(exaMeshF2C(*mesh),zc);
+}
+
+#define fExaMeshSetGlobalNumbering\
+  EXA_FORTRAN_NAME(exameshsetglobalnumbering,\
+  EXAMESHSETGLOBALNUMBERING)
+void fExaMeshSetGlobalNumbering(exaFortranMesh *mesh,exaLong *gloNum,
+  int *err)
+{
+  *err=exaMeshSetGlobalNumbering(exaMeshF2C(*mesh),gloNum);
+}
+
+#define fExaMeshSetMask\
+  EXA_FORTRAN_NAME(exameshsetmask,EXAMESHSETMASK)
+void fExaMeshSetMask(exaFortranMesh *mesh,exaScalar *mask,int *err)
+{
+  *err=exaMeshSetMask(exaMeshF2C(*mesh),mask);
+}
+
+#define fExaMeshSetGeometricFactors\
+  EXA_FORTRAN_NAME(exameshsetgeometricfactors,\
+  EXAMESHSETGEOMETRICFACTORS)
+void fExaMeshSetGeometricFactors(exaFortranMesh *mesh,exaScalar *geom,
+  int *err)
+{
+  *err=exaMeshSetGeometricFactors(exaMeshF2C(*mesh),geom);
+}
+
+#define fExaMeshSetDerivativeMatrix\
+  EXA_FORTRAN_NAME(exameshsetderivativematrix,\
+  EXAMESHSETDERIVATIVEMATRIX)
+void fExaMeshSetDerivativeMatrix(exaFortranMesh *mesh,exaScalar *D,
+  int *err)
+{
+  *err=exaMeshSetDerivativeMatrix(exaMeshF2C(*mesh),D);
 }
 
 #define fExaMeshGetDofsPerElement\

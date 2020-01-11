@@ -29,32 +29,23 @@ struct exaHmholtz_private{
 
 struct exaMesh_private{
   exaHandle h;
-  int isSetup;
+
+  /* offsets for geometric factors */
+  exaUInt G00ID,G01ID,G02ID,G11ID,G12ID,G22ID,GWJID;
 
   int ndim,nx1;
   exaInt nelt;
   exaInt nelv;
 
   /* x,y and z co-ordinates of mesh points */
-  exaScalar *xm1 ,*ym1 ,*zm1;
-
-  /* inv degree of a dof */
-  exaScalar *rmult;
-  exaVector d_rmult;
-
-  /* offsets for geometric factors */
-  exaUInt G00ID,G01ID,G02ID,G11ID,G12ID,G22ID,GWJID;
+  exaScalar *xm1,*ym1,*zm1;
 
   /* global numbering of dofs */
-  exaLong *glo_num;
+  exaLong *gloNum;
   exaVector d_globalStart;
   exaVector d_globalIds;
 
-  /* gather scatter setup */
-  exaGS gs; exaBuffer buf;
-
   /* boundary data */
-  int *boundaryID;
   exaScalar *mask;
   exaArray maskIds;
   exaVector d_maskIds;
@@ -62,8 +53,15 @@ struct exaMesh_private{
   exaScalar *geom;
   exaVector d_geom;
 
-  exaScalar *D;
-  exaVector d_D;
+  exaScalar *D,*Dt;
+  exaVector d_D,d_Dt;
+
+  /* gather scatter setup */
+  exaGS gs; exaBuffer buf;
+
+  /* inv degree of a dof */
+  exaScalar *rmult;
+  exaVector d_rmult;
 };
 
 #endif

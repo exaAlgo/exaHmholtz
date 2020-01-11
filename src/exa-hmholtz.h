@@ -23,14 +23,33 @@ int exaMeshCreate(exaMesh *mesh,const char *meshFile,exaHandle h);
 int exaMeshGetHandle(exaMesh mesh,exaHandle *h);
 int exaMeshSetHandle(exaMesh mesh,exaHandle *h);
 
-exaInt exaMeshGetElements(exaMesh mesh);
-int exaMeshSetElements(exaMesh mesh,exaInt nelem);
+exaInt exaMeshGetNElements(exaMesh mesh);
+int exaMeshSetNElements(exaMesh mesh,exaInt nelem);
 
 int exaMeshGet1DDofs(exaMesh mesh);
 int exaMeshSet1DDofs(exaMesh mesh,int nx1);
 
 int exaMeshGetDim(exaMesh mesh);
 int exaMeshSetDim(exaMesh mesh,int dim);
+
+int exaMeshSetXcoords(exaMesh mesh,exaScalar *xc);
+exaScalar *exaMeshGetXcoords(exaMesh mesh);
+int exaMeshSetYcoords(exaMesh mesh,exaScalar *yc);
+exaScalar *exaMeshGetYcoords(exaMesh mesh);
+int exaMeshSetZcoords(exaMesh mesh,exaScalar *zc);
+exaScalar *exaMeshGetZcoords(exaMesh mesh);
+
+int exaMeshSetGlobalNumbering(exaMesh mesh,exaLong *gloNum);
+exaLong *exaMeshGetGlobalNumbering(exaMesh mesh);
+
+int exaMeshSetMask(exaMesh mesh,exaScalar *mask);
+exaScalar *exaMeshGetMask(exaMesh mesh);
+
+int exaMeshSetGeometricFactors(exaMesh mesh,exaScalar *geom);
+exaScalar *exaMeshGetGeometricFactors(exaMesh mesh);
+
+int exaMeshSetDerivativeMatrix(exaMesh mesh,exaScalar *D);
+exaScalar *exaMeshGetDerivativeMatrix(exaMesh mesh);
 
 int exaMeshGetDofsPerElement(exaMesh mesh);
 int exaMeshGetLocalDofs(exaMesh mesh);

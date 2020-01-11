@@ -19,6 +19,10 @@ int exaHmholtzCreate(exaHmholtz *solver_,exaHandle h){
   return 0;
 }
 
+int exaHmholtzSetSettings(exaHmholtz solver,exaSettings *s){
+  solver->s=*s;
+  return 0;
+}
 int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s){
   *s=solver->s;
   return 0;
@@ -37,7 +41,7 @@ static const char *kernelDir="/kernels";
 static const char *interfaceDir="/interfaces";
 
 int setupSettings(exaSettings s,exaHmholtz solver){
-  solver->s=s;
+  exaHmholtzSetSettings(solver,&s);
 
   exaHandle h; exaHmholtzGetHandle(solver,&h);
 
@@ -119,7 +123,7 @@ int gatherScatterSetup(exaHmholtz hmhz,exaMesh mesh){
   exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
 
   /* setup gather scatter */
-  exaGSSetup(mesh->glo_num,totalDofs,exaGetComm(h),0,0,&mesh->gs);
+  exaGSSetup(mesh->gloNum,totalDofs,exaGetComm(h),0,0,&mesh->gs);
   exaBufferCreate(&mesh->buf,1024);
 
   /*TODO: setup global offsets and ids */
@@ -148,7 +152,7 @@ typedef struct{
 int copyDataToDevice(exaMesh mesh){
   exaHandle h; exaMeshGetHandle(mesh,&h);
 
-  int nelt=exaMeshGetElements(mesh);
+  int nelt=exaMeshGetNElements(mesh);
   int ndim=exaMeshGetDim(mesh);
   int nx1 =exaMeshGet1DDofs(mesh);
   int ngeom=exaMeshGetNGeom(mesh);
@@ -160,16 +164,12 @@ int copyDataToDevice(exaMesh mesh){
   exaVectorWrite(mesh->d_geom,mesh->geom);
 
   exaVectorCreate(h,nx1*nx1,exaScalar_t,&mesh->d_D);
-#if 0
-  exaVectorWrite(mesh->d_D,mesh->D);
-#else
   exaScalar *D; exaCalloc(nx1*nx1,&D);
   for(int i=0;i<nx1;i++)
     for(int j=0;j<nx1;j++)
     D[i*nx1+j]=mesh->D[j*nx1+i];
   exaVectorWrite(mesh->d_D,D);
   exaFree(D);
-#endif
 
   /* copy multiplicities to device */
   exaVectorCreate(h,totalDofs,exaScalar_t,&mesh->d_rmult);

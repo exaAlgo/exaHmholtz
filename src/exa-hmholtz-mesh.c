@@ -5,12 +5,19 @@ int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
   exaDebug(h,"[meshCreate]\n");
   exaMalloc(1,mesh_); exaMesh mesh=*mesh_;
 
-  //TODO: read the mesh from mesh file
-  // meshRead(mesh,meshFile);
+  if(meshFile==NULL){
+    mesh->nelt=-1;
+    mesh->nx1=-1;
+    mesh->ndim=-1;
+    mesh->xm1=mesh->ym1=mesh->zm1=NULL;
+    mesh->gloNum=NULL;
+    mesh->mask=mesh->geom=mesh->D=NULL;
+  }else{
+    //TODO: read the mesh from mesh file
+    // meshRead(mesh,meshFile);
+  }
 
   exaMeshSetHandle(mesh,&h);
-
-  mesh->isSetup=0;
 
   return 0;
 }
@@ -24,11 +31,19 @@ int exaMeshGetHandle(exaMesh mesh,exaHandle *h){
   return 0;
 }
 
-exaInt exaMeshGetElements(exaMesh mesh){
+exaInt exaMeshGetNElements(exaMesh mesh){
   return mesh->nelt;
 }
-int exaMeshSetElements(exaMesh mesh,exaInt nelem){
+int exaMeshSetNElements(exaMesh mesh,exaInt nelem){
   mesh->nelt=nelem;
+  return 0;
+}
+
+int exaMeshGet1DDofs(exaMesh mesh){
+  return mesh->nx1;
+}
+int exaMeshSet1DDofs(exaMesh mesh,int nx1){
+  mesh->nx1=nx1;
   return 0;
 }
 
@@ -40,12 +55,60 @@ int exaMeshSetDim(exaMesh mesh,int dim){
   return 0;
 }
 
-int exaMeshGet1DDofs(exaMesh mesh){
-  return mesh->nx1;
-}
-int exaMeshSet1DDofs(exaMesh mesh,int nx1){
-  mesh->nx1=nx1;
+int exaMeshSetXcoords(exaMesh mesh,exaScalar *xc){
+  mesh->xm1=xc;
   return 0;
+}
+exaScalar *exaMeshGetXcoords(exaMesh mesh){
+  return mesh->xm1;
+}
+
+int exaMeshSetYcoords(exaMesh mesh,exaScalar *yc){
+  mesh->ym1=yc;
+  return 0;
+}
+exaScalar *exaMeshGetYcoords(exaMesh mesh){
+  return mesh->ym1;
+}
+
+int exaMeshSetZcoords(exaMesh mesh,exaScalar *zc){
+  mesh->zm1=zc;
+  return 0;
+}
+exaScalar *exaMeshGetZcoords(exaMesh mesh){
+  return mesh->zm1;
+}
+
+int exaMeshSetGlobalNumbering(exaMesh mesh,exaLong *gloNum){
+  mesh->gloNum=gloNum;
+  return 0;
+}
+exaLong *exaMeshGetGlobalNumbering(exaMesh mesh){
+  return mesh->gloNum;
+}
+
+int exaMeshSetMask(exaMesh mesh,exaScalar *mask){
+  mesh->mask=mask;
+  return 0;
+}
+exaScalar *exaMeshGetMask(exaMesh mesh){
+  return mesh->mask;
+}
+
+int exaMeshSetGeometricFactors(exaMesh mesh,exaScalar *geom){
+  mesh->geom=geom;
+  return 0;
+}
+exaScalar *exaMeshGetGeometricFactors(exaMesh mesh){
+  return mesh->geom;
+}
+
+int exaMeshSetDerivativeMatrix(exaMesh mesh,exaScalar *D){
+  mesh->D=D;
+  return 0;
+}
+exaScalar *exaMeshGetDerivativeMatrix(exaMesh mesh){
+  return mesh->D;
 }
 
 int exaMeshGetDofsPerElement(exaMesh mesh){
@@ -64,7 +127,7 @@ int exaMeshGetNGeom(exaMesh mesh){
 }
 
 int exaMeshSetup(exaMesh mesh,exaSettings s){
-  int order; exaSettingsGet(&order,"general::oder",s);
+  int order; exaSettingsGet(&order,"general::order",s);
   int nx1=order+1; exaMeshSet1DDofs(mesh,nx1);
 
   int elemDofs=exaMeshGetDofsPerElement(mesh);
