@@ -10,7 +10,7 @@ LDFLAGS ?=
 INCFLAGS ?=
 
 # Dependency locations
-EXADIR ?=
+EXA_DIR ?=
 
 # Build options
 DEBUG ?= 1
@@ -21,12 +21,19 @@ PREFIX ?= $(HOME)/local/exaHmholtz
 ### Fortran interface ###
 UNDERSCORE ?= 1
 
-LDFLAGS  += -L$(EXADIR)/lib -lexa -lm
-INCFLAGS += -I$(EXADIR)/include
+### Meta info about the package ###
+SRCDIR       =src
+BUILDDIR     =build
+EXAMPLESDIR  =examples
+TESTSDIR     =tests
+INTERFACESDIR=interfaces
+
+LDFLAGS  += -L$(EXA_DIR)/lib -lexa -lm
+INCFLAGS += -I$(EXA_DIR)/include
 libName   = exaHmholtz
 
 ### Include template makefile ###
--include $(EXADIR)/share/exa-base.mk
+-include $(EXA_DIR)/share/exa-base.mk
 
 .PHONY: lib
 lib: lib-base
@@ -36,7 +43,7 @@ examples: install examples-base
 
 .PHONY: tests
 tests: install tests-base
-	@cp $(EXADIR)/share/run-tests.sh $(BUILDDIR)/$(TESTSDIR)
+	@cp $(EXA_DIR)/share/run-tests.sh $(BUILDDIR)/$(TESTSDIR)
 	@cd $(BUILDDIR)/$(TESTSDIR) && ./run-tests.sh
 
 .PHONY: install
