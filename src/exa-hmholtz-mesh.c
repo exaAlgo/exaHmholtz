@@ -127,7 +127,10 @@ int exaMeshGetNGeom(exaMesh mesh){
 }
 
 int exaMeshSetup(exaMesh mesh,exaSettings s){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+
   int order; exaSettingsGet(&order,"general::order",s);
+  exaDebug(h,"exaMeshSetup: order=%d\n",order);
   int nx1=order+1; exaMeshSet1DDofs(mesh,nx1);
 
   int elemDofs=exaMeshGetDofsPerElement(mesh);
