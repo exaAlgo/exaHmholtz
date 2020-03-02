@@ -14,12 +14,33 @@ int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
     mesh->mask=mesh->geom=mesh->D=NULL;
   }else{
     //TODO: read the mesh from mesh file
-    // meshRead(mesh,meshFile);
+    fprintf(stderr,"Reading the mesh from a file is not"
+      " implemented yet.");
   }
 
   exaMeshSetHandle(mesh,&h);
 
+  exaDebug(h,"[/meshCreate]\n");
   return 0;
+}
+
+int exaMeshInitialized(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[meshInitialized]\n");
+
+  int initialized=1;
+
+  if(mesh->nelt==-1||mesh->nx1==-1||mesh->ndim==-1)
+    initialized=0;
+  if(mesh->xm1==NULL||mesh->ym1==NULL||mesh->zm1==NULL)
+    initialized=0;
+  if(mesh->mask==NULL||mesh->geom==NULL||mesh->D==NULL)
+    initialized=0;
+  if(mesh->gloNum==NULL)
+    initialized=0;
+
+  exaDebug(h,"[/meshInitialized]\n");
+  return initialized;
 }
 
 int exaMeshSetHandle(exaMesh mesh,exaHandle *h){
@@ -35,6 +56,10 @@ exaInt exaMeshGetNElements(exaMesh mesh){
   return mesh->nelt;
 }
 int exaMeshSetNElements(exaMesh mesh,exaInt nelem){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetNElements] %s:%d nelem=%d\n",__FILE__,
+    __LINE__,nelem);
+
   mesh->nelt=nelem;
   return 0;
 }
@@ -43,6 +68,10 @@ int exaMeshGet1DDofs(exaMesh mesh){
   return mesh->nx1;
 }
 int exaMeshSet1DDofs(exaMesh mesh,int nx1){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSet1DDofs] %s:%d nx1=%d\n",__FILE__,
+    __LINE__,nx1);
+
   mesh->nx1=nx1;
   return 0;
 }
@@ -51,11 +80,19 @@ int exaMeshGetDim(exaMesh mesh){
   return mesh->ndim;
 }
 int exaMeshSetDim(exaMesh mesh,int dim){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetDim] %s:%d ndim=%d\n",__FILE__,
+    __LINE__,dim);
+
   mesh->ndim=dim;
   return 0;
 }
 
 int exaMeshSetXcoords(exaMesh mesh,exaScalar *xc){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetXcoords] %s:%d xm1=%p\n",__FILE__,
+    __LINE__,xc);
+
   mesh->xm1=xc;
   return 0;
 }
@@ -64,6 +101,10 @@ exaScalar *exaMeshGetXcoords(exaMesh mesh){
 }
 
 int exaMeshSetYcoords(exaMesh mesh,exaScalar *yc){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetXcoords] %s:%d ym1=%p\n",__FILE__,
+    __LINE__,yc);
+
   mesh->ym1=yc;
   return 0;
 }
@@ -72,6 +113,10 @@ exaScalar *exaMeshGetYcoords(exaMesh mesh){
 }
 
 int exaMeshSetZcoords(exaMesh mesh,exaScalar *zc){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetXcoords] %s:%d zm1=%p\n",__FILE__,
+    __LINE__,zc);
+
   mesh->zm1=zc;
   return 0;
 }
@@ -80,6 +125,11 @@ exaScalar *exaMeshGetZcoords(exaMesh mesh){
 }
 
 int exaMeshSetGlobalNumbering(exaMesh mesh,exaLong *gloNum){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetGlobalNumbering] %s:%d glo_num=%p\n",
+    __FILE__, __LINE__,gloNum);
+
+  //should this be a copy?
   mesh->gloNum=gloNum;
   return 0;
 }
@@ -88,6 +138,10 @@ exaLong *exaMeshGetGlobalNumbering(exaMesh mesh){
 }
 
 int exaMeshSetMask(exaMesh mesh,exaScalar *mask){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetMask] %s:%d rmask=%p\n", __FILE__,
+    __LINE__,mask);
+
   mesh->mask=mask;
   return 0;
 }
@@ -96,6 +150,10 @@ exaScalar *exaMeshGetMask(exaMesh mesh){
 }
 
 int exaMeshSetGeometricFactors(exaMesh mesh,exaScalar *geom){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetGeometricFactors] %s:%d geom=%p\n",
+    __FILE__,__LINE__,geom);
+
   mesh->geom=geom;
   return 0;
 }
@@ -104,6 +162,10 @@ exaScalar *exaMeshGetGeometricFactors(exaMesh mesh){
 }
 
 int exaMeshSetDerivativeMatrix(exaMesh mesh,exaScalar *D){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetDerivativeMatrix] %s:%d dxm1=%p\n",
+    __FILE__,__LINE__,D);
+
   mesh->D=D;
   return 0;
 }
@@ -128,21 +190,20 @@ int exaMeshGetNGeom(exaMesh mesh){
 
 int exaMeshSetup(exaMesh mesh,exaSettings s){
   exaHandle h; exaMeshGetHandle(mesh,&h);
+  exaDebug(h,"[exaMeshSetup] %s:%d\n",__FILE__,__LINE__);
 
-  int order; exaSettingsGet(&order,"general::order",s);
-  exaDebug(h,"exaMeshSetup: order=%d\n",order);
-  int nx1=order+1; exaMeshSet1DDofs(mesh,nx1);
+  assert(exaMeshInitialized(mesh));
 
-  int elemDofs=exaMeshGetDofsPerElement(mesh);
+  int nx1=exaMeshGet1DDofs(mesh);
+  int ndim=exaMeshGetDim(mesh);
   int ngeom=exaMeshGetNGeom(mesh);
+  int elemDofs=exaMeshGetDofsPerElement(mesh);
 
-  //p_Nggeo,p_Np
   exaSettingsSet("defines::p_Nq"   ,getExaUInt(nx1     ),s);
   exaSettingsSet("defines::p_Np"   ,getExaUInt(elemDofs),s);
   exaSettingsSet("defines::p_Nggeo",getExaUInt(ngeom   ),s);
 
   //p_G00ID,p_G01ID,p_G02ID,p_G11ID,p_G12ID,p_G22ID,p_GWJID
-  int ndim=exaMeshGetDim(mesh);
   if(ndim==2){
     exaSettingsSet("defines::p_G00ID",getExaUInt(0),s);
     exaSettingsSet("defines::p_G01ID",getExaUInt(1),s);

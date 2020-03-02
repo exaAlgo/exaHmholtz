@@ -58,6 +58,14 @@ void fExaMeshCreate(exaFortranMesh *mesh,const char *meshFile,
     *mesh=meshCurrent++,meshActive++;
 }
 
+#define fExaMeshSetup\
+  EXA_FORTRAN_NAME(exameshsetup,EXAMESHSETUP)
+void fExaMeshSetup(exaFortranMesh *mesh,exaFortranSettings *s,
+  int *err)
+{
+  *err=exaMeshSetup(exaMeshF2C(*mesh),exaSettingsF2C(*s));
+}
+
 #define fExaMeshGetNElements\
   EXA_FORTRAN_NAME(exameshgetnelements,EXAMESHGETNELEMENTS)
 void fExaMeshGetNElements(int *nelem,exaFortranMesh *mesh,int *err){
