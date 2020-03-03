@@ -194,10 +194,10 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
 
   assert(exaMeshInitialized(mesh));
 
-  int nx1=exaMeshGet1DDofs(mesh);
-  int ndim=exaMeshGetDim(mesh);
-  int ngeom=exaMeshGetNGeom(mesh);
-  int elemDofs=exaMeshGetDofsPerElement(mesh);
+  exaUInt nx1=exaMeshGet1DDofs(mesh);
+  exaUInt ndim=exaMeshGetDim(mesh);
+  exaUInt ngeom=exaMeshGetNGeom(mesh);
+  exaUInt elemDofs=exaMeshGetDofsPerElement(mesh);
 
   exaSettingsSet("defines::p_Nq"   ,getExaUInt(nx1     ),s);
   exaSettingsSet("defines::p_Np"   ,getExaUInt(elemDofs),s);

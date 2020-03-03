@@ -51,8 +51,13 @@ void fExaMeshCreate(exaFortranMesh *mesh,const char *meshFile,
   if(meshCurrent==meshMax)
     meshMax+=meshMax/2+1,exaRealloc(meshMax,&meshDict);
 
+  exaDebug(exaHandleF2C(*exa),"[fExaMeshCreate] %s:%d %s %d\n",
+    __FILE__,__LINE__,meshFile_c,meshFile_len);
+
+  //TODO: Null value passed from Fortran will be of length 1.
+  //Need to figure out a better way to do this.
   *err=exaMeshCreate(&meshDict[meshCurrent],
-    strlen(meshFile_c)>0?meshFile_c:NULL,exaHandleF2C(*exa));
+    strlen(meshFile_c)>1?meshFile_c:NULL,exaHandleF2C(*exa));
 
   if(*err==0)
     *mesh=meshCurrent++,meshActive++;
