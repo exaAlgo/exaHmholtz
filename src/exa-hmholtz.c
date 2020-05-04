@@ -209,13 +209,15 @@ int copyDataToDevice(exaMesh mesh){
 }
 
 int exaHmholtzSetup(exaHmholtz hmhz,exaSettings s,exaMesh mesh){
+  exaHandle h; exaHmholtzGetHandle(hmhz,&h);
+  exaDebug(h,"[hmholtzSetup]\n");
+
   setupSettings(s,hmhz);
   buildKernels(s,hmhz);
-#if 0
   gatherScatterSetup(hmhz,mesh);
   copyDataToDevice(mesh);
-#endif
 
+  exaDebug(h,"[/hmholtzSetup]\n");
   return 0;
 }
 
@@ -232,5 +234,6 @@ int exaHmholtzDestroy(exaHmholtz hmhz){
 
   exaFree(hmhz);
 
+  exaDebug(h,"[/hmholtzDestroy]\n");
   return 0;
 }
