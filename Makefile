@@ -29,7 +29,7 @@ TESTSDIR     =tests
 INTERFACESDIR=interfaces
 
 LDFLAGS  += -L$(EXA_DIR)/lib -lexa -lm
-INCFLAGS += -I$(EXA_DIR)/include
+INCFLAGS += -I$(EXA_DIR)/include -I$(SRCDIR) -I$(INTERFACESDIR)
 libName   = exaHmholtz
 
 ### Include template makefile ###
