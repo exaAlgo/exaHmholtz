@@ -18,6 +18,8 @@ int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
       " implemented yet.");
   }
 
+  mesh->hmholtzAx=NULL;
+
   exaMeshSetHandle(mesh,&h);
 
   exaDebug(h,"[/meshCreate]\n");
@@ -188,11 +190,123 @@ int exaMeshGetNGeom(exaMesh mesh){
   return (ndim*(ndim+1))/2+1;
 }
 
+static int gatherScatterSetup(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+
+  exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
+
+  /* setup gather scatter */
+  exaGSSetup(mesh->gloNum,totalDofs,exaGetComm(h),0,0,&mesh->gs);
+  exaBufferCreate(&mesh->buf,1024);
+
+  /*TODO: setup global offsets and ids */
+
+  /* setup multiplicities on host */
+  exaMalloc(totalDofs,&mesh->rmult);
+  exaUInt i;
+  for(i=0;i<totalDofs;i++)
+    mesh->rmult[i]=1.0;
+
+  exaGSOp(mesh->rmult,exaScalar_t,exaAddOp,0,mesh->gs,mesh->buf);
+
+  for(i=0;i<totalDofs;i++){
+    mesh->rmult[i]=1.0/mesh->rmult[i];
+    exaDebug(h,"%lf ",mesh->rmult[i]);
+  }
+  exaDebug(h,"\n");
+
+  return 0;
+}
+
+typedef struct{
+  exaInt id;
+} maskID;
+
+static int copyDataToDevice(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+
+  int nelt=exaMeshGetNElements(mesh);
+  int ndim=exaMeshGetDim(mesh);
+  int nx1 =exaMeshGet1DDofs(mesh);
+  int ngeom=exaMeshGetNGeom(mesh);
+
+  exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
+
+  /* copy geometric factors and derivative matrix */
+  exaVectorCreate(h,totalDofs*ngeom,exaScalar_t,&mesh->d_geom);
+  exaVectorWrite(mesh->d_geom,mesh->geom);
+
+  exaVectorCreate(h,nx1*nx1,exaScalar_t,&mesh->d_D);
+  exaScalar *D; exaCalloc(nx1*nx1,&D);
+  for(int i=0;i<nx1;i++)
+    for(int j=0;j<nx1;j++)
+    D[i*nx1+j]=mesh->D[j*nx1+i];
+  exaVectorWrite(mesh->d_D,D);
+  exaFree(D);
+
+  /* copy multiplicities to device */
+  exaVectorCreate(h,totalDofs,exaScalar_t,&mesh->d_rmult);
+  exaVectorWrite(mesh->d_rmult,mesh->rmult);
+
+  /* setup mask */
+  maskID id;
+  exaArrayInit(&mesh->maskIds,maskID,10);
+  exaDebug(h,"Masked ids: ");
+
+  exaUInt i;
+  for(i=0;i<totalDofs;i++)
+    if(fabs(mesh->mask[i])<EXA_TOL){
+      exaDebug(h,"%d ",i);
+      id.id=i;
+      exaArrayAppend(mesh->maskIds,&id);
+    }
+  exaDebug(h,"\n");
+
+  exaUInt size=exaArrayGetSize(mesh->maskIds);
+
+  exaInt *ids; exaCalloc(size,&ids);
+  maskID *ptr=exaArrayGetPointer(mesh->maskIds);
+  exaDebug(h,"Masked ids: ");
+  for(i=0;i<size;i++){
+    ids[i]=ptr[i].id;
+    exaDebug(h,"%d ",ids[i]);
+  }
+  exaDebug(h,"\n");
+
+  /* copy masks to device */
+  exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
+  exaVectorWrite(mesh->d_maskIds,ids);
+  exaFree(ids);
+
+  return 0;
+}
+
+static int buildKernels(exaSettings s,exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+
+  const char *kernelDir;
+  exaSettingsGet(&kernelDir,"hmholtz::kernel_dir",s);
+
+  char fname[BUFSIZ];
+  strcpy(fname,kernelDir);
+  int pathLength=strlen(kernelDir);
+
+  strcpy(fname+pathLength,"/hmholtz");
+  exaDebug(h,"Hmholtz operator kernel=%s\n",fname);
+
+  exaProgram p;
+  exaProgramCreate(h,fname,s,&p);
+  exaKernelCreate(p,"BK5",&mesh->hmholtzAx);
+  exaProgramFree(p);
+
+  return 0;
+}
+
 int exaMeshSetup(exaMesh mesh,exaSettings s){
   exaHandle h; exaMeshGetHandle(mesh,&h);
   exaDebug(h,"[exaMeshSetup] %s:%d\n",__FILE__,__LINE__);
 
-  assert(exaMeshInitialized(mesh));
+  assert(exaMeshInitialized(mesh)!=0);
 
   exaUInt nx1=exaMeshGet1DDofs(mesh);
   exaUInt ndim=exaMeshGetDim(mesh);
@@ -230,6 +344,10 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
     mesh->GWJID=6;
   }
 
+  gatherScatterSetup(mesh);
+  copyDataToDevice(mesh);
+  buildKernels(s,mesh);
+
   return 0;
 }
 
@@ -251,6 +369,7 @@ int exaMeshDestroy(exaMesh mesh){
 
   exaDestroy(mesh->d_D);
 #endif
+  exaDestroy(mesh->hmholtzAx);
 
   exaFree(mesh);
 

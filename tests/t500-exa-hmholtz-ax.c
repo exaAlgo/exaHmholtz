@@ -22,7 +22,7 @@ int main(int argc,char *argv[])
   exaMeshSetup(mesh,s);
 
   exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
-  exaHmholtzSetup(hmhz,s,mesh);
+  exaHmholtzSetup(hmhz,s);
 
   // create x with zero initial guess and rhs with sin function
   exaVector x,b; exaUInt size=exaMeshGetLocalDofs(mesh);

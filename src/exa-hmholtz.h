@@ -14,7 +14,7 @@ int exaHmholtzCreate(exaHmholtz *solver,exaHandle h);
 int exaHmholtzGetHandle(exaHmholtz solver,exaHandle *h);
 int exaHmholtzSetHandle(exaHmholtz solver,exaHandle *h);
 int exaHmholtzGetSettings(exaHmholtz solver,exaSettings *s);
-int exaHmholtzSetup(exaHmholtz solver,exaSettings s,exaMesh mesh);
+int exaHmholtzSetup(exaHmholtz solver,exaSettings s);
 int exaHmholtzDestroy(exaHmholtz solver);
 //
 // exaMesh
@@ -61,8 +61,7 @@ int exaMeshDestroy(exaMesh mesh);
 //
 // Hmholtz Operator
 //
-int exaHmholtzOperator(exaVector p,exaVector Ap,exaMesh mesh,
-  exaHmholtz hz);
+int exaHmholtzOperator(exaVector p,exaVector Ap,exaMesh mesh);
 //
 // Mask
 //

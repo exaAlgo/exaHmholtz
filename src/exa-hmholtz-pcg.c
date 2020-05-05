@@ -32,7 +32,7 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
   int nIter=0;
   while(nIter<maxit && rdotr>TOL){
     //Calculate Ap=A*p
-    exaHmholtzOperator(p,Ap,mesh,hz);
+    exaHmholtzOperator(p,Ap,mesh);
     exaScalar norm=exaVectorWeightedNorm2(mesh->d_rmult,Ap,hz);
     if(verbose)
       printf("norm Ap: %lf\n",norm);

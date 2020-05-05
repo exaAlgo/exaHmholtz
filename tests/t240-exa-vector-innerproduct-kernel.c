@@ -20,11 +20,8 @@ int main(int argc,char *argv[])
   exaSettings s; exaSettingsCreate(h,NULL,&s);
   exaSettingsSet("general::order",getExaInt(7),s);
 
-  exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
-  exaMeshSetup(mesh,s);
-
   exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
-  exaHmholtzSetup(hmhz,s,mesh);
+  exaHmholtzSetup(hmhz,s);
 
   exaVector vec,weights;
   exaVectorCreate(h,M,exaScalar_t,&vec);
@@ -50,7 +47,6 @@ int main(int argc,char *argv[])
   exaDestroy(weights);
 
   exaHmholtzDestroy(hmhz);
-  exaMeshDestroy(mesh);
   exaDestroy(s);
 
   exaFinalize(h);

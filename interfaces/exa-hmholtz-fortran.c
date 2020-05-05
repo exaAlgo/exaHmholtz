@@ -200,10 +200,9 @@ void fExaMeshDestroy(exaFortranMesh *mesh,int *err){
 #define fExaHmholtzSetup\
   EXA_FORTRAN_NAME(exahmholtzsetup,EXAHMHOLTZSETUP)
 void fExaHmholtzSetup(exaFortranHmholtz *hmhz,
-  exaFortranSettings *s,exaFortranMesh *mesh,int *err)
+  exaFortranSettings *s,int *err)
 {
-  *err=exaHmholtzSetup(exaHmholtzF2C(*hmhz),exaSettingsF2C(*s),
-    exaMeshF2C(*mesh));
+  *err=exaHmholtzSetup(exaHmholtzF2C(*hmhz),exaSettingsF2C(*s));
 }
 
 exaMesh exaMeshF2C(exaFortranMesh mesh){

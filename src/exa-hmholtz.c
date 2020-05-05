@@ -14,7 +14,6 @@ int exaHmholtzCreate(exaHmholtz *solver_,exaHandle h){
   solver->vectorInnerProduct2=NULL;
   solver->vectorScaledAdd=NULL;
   solver->mask=NULL;
-  solver->hmholtzAx=NULL;
 
   return 0;
 }
@@ -40,7 +39,7 @@ int exaHmholtzSetHandle(exaHmholtz solver,exaHandle *h){
 static const char *kernelDir="/kernels";
 static const char *interfaceDir="/interfaces";
 
-int setupSettings(exaSettings s,exaHmholtz solver){
+static int setupSettings(exaSettings s,exaHmholtz solver){
   exaHmholtzSetSettings(solver,&s);
 
   exaHandle h; exaHmholtzGetHandle(solver,&h);
@@ -79,7 +78,7 @@ int setupSettings(exaSettings s,exaHmholtz solver){
   return 0;
 }
 
-int buildKernels(exaSettings s,exaHmholtz hmhz){
+static int buildKernels(exaSettings s,exaHmholtz hmhz){
   exaHandle h; exaHmholtzGetHandle(hmhz,&h);
 
   const char *kernelDir;
@@ -108,114 +107,16 @@ int buildKernels(exaSettings s,exaHmholtz hmhz){
   exaKernelCreate(hmhz->p,"mask",&hmhz->mask);
   exaProgramFree(hmhz->p);
 
-  strcpy(fname+pathLength,"/hmholtz");
-  exaDebug(h,"Hmholtz operator kernel=%s\n",fname);
-  exaProgramCreate(h,fname,s,&hmhz->p);
-  exaKernelCreate(hmhz->p,"BK5",&hmhz->hmholtzAx);
-  exaProgramFree(hmhz->p);
-
   return 0;
 }
 
-int gatherScatterSetup(exaHmholtz hmhz,exaMesh mesh){
-  exaHandle h; exaMeshGetHandle(mesh,&h);
 
-  exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
-
-  /* setup gather scatter */
-  exaGSSetup(mesh->gloNum,totalDofs,exaGetComm(h),0,0,&mesh->gs);
-  exaBufferCreate(&mesh->buf,1024);
-
-  /*TODO: setup global offsets and ids */
-
-  /* setup multiplicities on host */
-  exaMalloc(totalDofs,&mesh->rmult);
-  exaUInt i;
-  for(i=0;i<totalDofs;i++)
-    mesh->rmult[i]=1.0;
-
-  exaGSOp(mesh->rmult,exaScalar_t,exaAddOp,0,mesh->gs,mesh->buf);
-
-  for(i=0;i<totalDofs;i++){
-    mesh->rmult[i]=1.0/mesh->rmult[i];
-    exaDebug(h,"%lf ",mesh->rmult[i]);
-  }
-  exaDebug(h,"\n");
-
-  return 0;
-}
-
-typedef struct{
-  exaInt id;
-} maskID;
-
-int copyDataToDevice(exaMesh mesh){
-  exaHandle h; exaMeshGetHandle(mesh,&h);
-
-  int nelt=exaMeshGetNElements(mesh);
-  int ndim=exaMeshGetDim(mesh);
-  int nx1 =exaMeshGet1DDofs(mesh);
-  int ngeom=exaMeshGetNGeom(mesh);
-
-  exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
-
-  /* copy geometric factors and derivative matrix */
-  exaVectorCreate(h,totalDofs*ngeom,exaScalar_t,&mesh->d_geom);
-  exaVectorWrite(mesh->d_geom,mesh->geom);
-
-  exaVectorCreate(h,nx1*nx1,exaScalar_t,&mesh->d_D);
-  exaScalar *D; exaCalloc(nx1*nx1,&D);
-  for(int i=0;i<nx1;i++)
-    for(int j=0;j<nx1;j++)
-    D[i*nx1+j]=mesh->D[j*nx1+i];
-  exaVectorWrite(mesh->d_D,D);
-  exaFree(D);
-
-  /* copy multiplicities to device */
-  exaVectorCreate(h,totalDofs,exaScalar_t,&mesh->d_rmult);
-  exaVectorWrite(mesh->d_rmult,mesh->rmult);
-
-  /* setup mask */
-  maskID id;
-  exaArrayInit(&mesh->maskIds,maskID,10);
-  exaDebug(h,"Masked ids: ");
-
-  exaUInt i;
-  for(i=0;i<totalDofs;i++)
-    if(fabs(mesh->mask[i])<EXA_TOL){
-      exaDebug(h,"%d ",i);
-      id.id=i;
-      exaArrayAppend(mesh->maskIds,&id);
-    }
-  exaDebug(h,"\n");
-
-  exaUInt size=exaArrayGetSize(mesh->maskIds);
-
-  exaInt *ids; exaCalloc(size,&ids);
-  maskID *ptr=exaArrayGetPointer(mesh->maskIds);
-  exaDebug(h,"Masked ids: ");
-  for(i=0;i<size;i++){
-    ids[i]=ptr[i].id;
-    exaDebug(h,"%d ",ids[i]);
-  }
-  exaDebug(h,"\n");
-
-  /* copy masks to device */
-  exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
-  exaVectorWrite(mesh->d_maskIds,ids);
-  exaFree(ids);
-
-  return 0;
-}
-
-int exaHmholtzSetup(exaHmholtz hmhz,exaSettings s,exaMesh mesh){
+int exaHmholtzSetup(exaHmholtz hmhz,exaSettings s){
   exaHandle h; exaHmholtzGetHandle(hmhz,&h);
   exaDebug(h,"[hmholtzSetup]\n");
 
   setupSettings(s,hmhz);
   buildKernels(s,hmhz);
-  gatherScatterSetup(hmhz,mesh);
-  copyDataToDevice(mesh);
 
   exaDebug(h,"[/hmholtzSetup]\n");
   return 0;
@@ -225,7 +126,6 @@ int exaHmholtzDestroy(exaHmholtz hmhz){
   exaHandle h; exaHmholtzGetHandle(hmhz,&h);
   exaDebug(h,"[hmholtzDestroy]\n");
 
-  exaDestroy(hmhz->hmholtzAx);
   exaDestroy(hmhz->mask);
   exaDestroy(hmhz->vectorScaledAdd);
   exaDestroy(hmhz->vectorWeightedInnerProduct2);

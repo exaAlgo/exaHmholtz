@@ -31,11 +31,8 @@ int main(int argc,char *argv[])
   exaSettings s; exaSettingsCreate(h,NULL,&s);
   exaSettingsSet("general::order",getExaInt(7),s);
 
-  exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
-  exaMeshSetup(mesh,s);
-
   exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
-  exaHmholtzSetup(hmhz,s,mesh);
+  exaHmholtzSetup(hmhz,s);
 
   char oklName[BUFSIZ]; GET_OKL_NAME(oklName,argv[0]);
   exaProgram p; exaProgramCreate(h,oklName,s,&p);
@@ -85,7 +82,6 @@ int main(int argc,char *argv[])
   exaDestroy(s); exaDestroy(kernelAx);
 
   exaHmholtzDestroy(hmhz);
-  exaMeshDestroy(mesh);
   exaFinalize(h);
 
   MPI_Finalize();
