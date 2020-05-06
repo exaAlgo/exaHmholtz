@@ -7,11 +7,17 @@ int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
 
   if(meshFile==NULL){
     mesh->nelt=-1;
-    mesh->nx1=-1;
+    mesh->nx1 =-1;
     mesh->ndim=-1;
+
     mesh->xm1=mesh->ym1=mesh->zm1=NULL;
+    mesh->xc =mesh->yc =mesh->zc =NULL;
+
     mesh->gloNum=NULL;
-    mesh->mask=mesh->geom=mesh->D=NULL;
+
+    mesh->mask=NULL;
+    mesh->geom=NULL;
+    mesh->D   =NULL;
   }else{
     //TODO: read the mesh from mesh file
     fprintf(stderr,"Reading the mesh from a file is not"
@@ -32,7 +38,9 @@ int exaMeshInitialized(exaMesh mesh){
 
   int initialized=1;
 
-  if(mesh->nelt==-1||mesh->nx1==-1||mesh->ndim==-1)
+  if(mesh->nelt==-1||mesh->ndim==-1)
+    initialized=0;
+  if(mesh->xc==NULL||mesh->yc==NULL||mesh->zc==NULL)
     initialized=0;
   if(mesh->xm1==NULL||mesh->ym1==NULL||mesh->zm1==NULL)
     initialized=0;
@@ -59,10 +67,15 @@ exaInt exaMeshGetNElements(exaMesh mesh){
 }
 int exaMeshSetNElements(exaMesh mesh,exaInt nelem){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetNElements] %s:%d nelem=%d\n",__FILE__,
-    __LINE__,nelem);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetNElements] %s:%d nelem=%d\n",
+      __FILE__,__LINE__,nelem);
 
   mesh->nelt=nelem;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetNElements]\n");
+
   return 0;
 }
 
@@ -71,10 +84,14 @@ int exaMeshGet1DDofs(exaMesh mesh){
 }
 int exaMeshSet1DDofs(exaMesh mesh,int nx1){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSet1DDofs] %s:%d nx1=%d\n",__FILE__,
-    __LINE__,nx1);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSet1DDofs] %s:%d nx1=%d\n",__FILE__,__LINE__,nx1);
 
   mesh->nx1=nx1;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSet1DDofs]\n");
+
   return 0;
 }
 
@@ -83,56 +100,128 @@ int exaMeshGetDim(exaMesh mesh){
 }
 int exaMeshSetDim(exaMesh mesh,int dim){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetDim] %s:%d ndim=%d\n",__FILE__,
-    __LINE__,dim);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetDim] %s:%d dim=%d\n",__FILE__,__LINE__,dim);
 
   mesh->ndim=dim;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetDim]\n");
   return 0;
 }
 
-int exaMeshSetXcoords(exaMesh mesh,exaScalar *xc){
+int exaMeshSetElemX(exaMesh mesh,exaScalar *xc){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetXcoords] %s:%d xm1=%p\n",__FILE__,
-    __LINE__,xc);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetElemX] %s:%d xc=%p\n",__FILE__,__LINE__,xc);
 
-  mesh->xm1=xc;
+  mesh->xc=xc;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetElemX]\n");
   return 0;
 }
-exaScalar *exaMeshGetXcoords(exaMesh mesh){
+exaScalar *exaMeshGetElemX(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  return mesh->xc;
+}
+
+int exaMeshSetElemY(exaMesh mesh,exaScalar *yc){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetElemY] %s:%d yc=%p\n",__FILE__,__LINE__,yc);
+
+  mesh->yc=yc;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetElemY]\n");
+
+  return 0;
+}
+exaScalar *exaMeshGetElemY(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  return mesh->yc;
+}
+
+int exaMeshSetElemZ(exaMesh mesh,exaScalar *zc){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetElemZ] %s:%d zc=%p\n",__FILE__,__LINE__,zc);
+
+  mesh->zc=zc;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetElemZ]\n");
+
+  return 0;
+}
+exaScalar *exaMeshGetElemZ(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  return mesh->zc;
+}
+
+int exaMeshSetMeshX(exaMesh mesh,exaScalar *xm1){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetMeshX] %s:%d xm1=%p\n",__FILE__,__LINE__,xm1);
+
+  mesh->xm1=xm1;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetMeshX]\n");
+  return 0;
+}
+exaScalar *exaMeshGetMeshX(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
   return mesh->xm1;
 }
 
-int exaMeshSetYcoords(exaMesh mesh,exaScalar *yc){
+int exaMeshSetMeshY(exaMesh mesh,exaScalar *ym1){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetXcoords] %s:%d ym1=%p\n",__FILE__,
-    __LINE__,yc);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetMeshY] %s:%d ym1=%p\n",__FILE__,__LINE__,ym1);
 
-  mesh->ym1=yc;
+  mesh->ym1=ym1;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetMeshY]\n");
+
   return 0;
 }
-exaScalar *exaMeshGetYcoords(exaMesh mesh){
+exaScalar *exaMeshGetMeshY(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
   return mesh->ym1;
 }
 
-int exaMeshSetZcoords(exaMesh mesh,exaScalar *zc){
+int exaMeshSetMeshZ(exaMesh mesh,exaScalar *zm1){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetXcoords] %s:%d zm1=%p\n",__FILE__,
-    __LINE__,zc);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetMeshZ] %s:%d zm1=%p\n",__FILE__,__LINE__,zm1);
 
-  mesh->zm1=zc;
+  mesh->zm1=zm1;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetMeshZ]\n");
+
   return 0;
 }
-exaScalar *exaMeshGetZcoords(exaMesh mesh){
+exaScalar *exaMeshGetMeshZ(exaMesh mesh){
+  exaHandle h; exaMeshGetHandle(mesh,&h);
   return mesh->zm1;
 }
 
 int exaMeshSetGlobalNumbering(exaMesh mesh,exaLong *gloNum){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetGlobalNumbering] %s:%d glo_num=%p\n",
-    __FILE__, __LINE__,gloNum);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetGlobalNumbering] %s:%d glo_num=%p\n",
+      __FILE__, __LINE__,gloNum);
 
   //should this be a copy?
   mesh->gloNum=gloNum;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetGlobalNumbering]\n");
+
   return 0;
 }
 exaLong *exaMeshGetGlobalNumbering(exaMesh mesh){

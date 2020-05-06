@@ -36,7 +36,9 @@ struct exaMesh_private{
   exaInt nelt;
   exaInt nelv;
 
-  /* x,y and z co-ordinates of mesh points */
+  /* x,y and z co-ordinates of elements */
+  exaScalar *xc,*yc,*zc;
+  /* x,y and z co-ordinates of mesh 1 */
   exaScalar *xm1,*ym1,*zm1;
 
   /* global numbering of dofs */

@@ -19,6 +19,10 @@ int main(int argc,char *argv[])
   exaSettingsSet("general::order",getExaInt(7),s);
 
   exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
+  exaMeshSetNElements(mesh,2);
+  exaMeshSetDim(mesh,3);
+
+  // TODO: Initialize the mesh
   exaMeshSetup(mesh,s);
 
   exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);

@@ -110,22 +110,40 @@ void fExaMeshSetDim(exaFortranMesh *mesh,int *ndim,int *err){
   *err=exaMeshSetDim(exaMeshF2C(*mesh),*ndim);
 }
 
-#define fExaMeshSetXcoords\
-  EXA_FORTRAN_NAME(exameshsetxcoords,EXAMESHSETXCOORDS)
-void fExaMeshSetXcoords(exaFortranMesh *mesh,exaScalar *xc,int *err){
-  *err=exaMeshSetXcoords(exaMeshF2C(*mesh),xc);
+#define fExaMeshSetElemX\
+  EXA_FORTRAN_NAME(exameshsetelemx,EXAMESHSETELEMX)
+void fExaMeshSetElemX(exaFortranMesh *mesh,exaScalar *xc,int *err){
+  *err=exaMeshSetElemX(exaMeshF2C(*mesh),xc);
 }
 
-#define fExaMeshSetYcoords\
-  EXA_FORTRAN_NAME(exameshsetycoords,EXAMESHSETYCOORDS)
-void fExaMeshSetYcoords(exaFortranMesh *mesh,exaScalar *yc,int *err){
-  *err=exaMeshSetYcoords(exaMeshF2C(*mesh),yc);
+#define fExaMeshSetElemY\
+  EXA_FORTRAN_NAME(exameshsetelemy,EXAMESHSETELEMY)
+void fExaMeshSetElemY(exaFortranMesh *mesh,exaScalar *yc,int *err){
+  *err=exaMeshSetElemY(exaMeshF2C(*mesh),yc);
 }
 
-#define fExaMeshSetZcoords\
-  EXA_FORTRAN_NAME(exameshsetzcoords,EXAMESHSETZCOORDS)
-void fExaMeshSetZcoords(exaFortranMesh *mesh,exaScalar *zc,int *err){
-  *err=exaMeshSetZcoords(exaMeshF2C(*mesh),zc);
+#define fExaMeshSetElemZ\
+  EXA_FORTRAN_NAME(exameshsetelemz,EXAMESHSETELEMZ)
+void fExaMeshSetElemZ(exaFortranMesh *mesh,exaScalar *zc,int *err){
+  *err=exaMeshSetElemZ(exaMeshF2C(*mesh),zc);
+}
+
+#define fExaMeshSetMeshX\
+  EXA_FORTRAN_NAME(exameshsetmeshx,EXAMESHSETMESHX)
+void fExaMeshSetMeshX(exaFortranMesh *mesh,exaScalar *xc,int *err){
+  *err=exaMeshSetMeshX(exaMeshF2C(*mesh),xc);
+}
+
+#define fExaMeshSetMeshY\
+  EXA_FORTRAN_NAME(exameshsetmeshy,EXAMESHSETMESHY)
+void fExaMeshSetMeshY(exaFortranMesh *mesh,exaScalar *yc,int *err){
+  *err=exaMeshSetMeshY(exaMeshF2C(*mesh),yc);
+}
+
+#define fExaMeshSetMeshZ\
+  EXA_FORTRAN_NAME(exameshsetmeshz,EXAMESHSETMESHZ)
+void fExaMeshSetMeshZ(exaFortranMesh *mesh,exaScalar *zc,int *err){
+  *err=exaMeshSetMeshZ(exaMeshF2C(*mesh),zc);
 }
 
 #define fExaMeshSetGlobalNumbering\

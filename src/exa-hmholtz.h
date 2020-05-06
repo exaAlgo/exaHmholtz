@@ -32,12 +32,19 @@ int exaMeshSet1DDofs(exaMesh mesh,int nx1);
 int exaMeshGetDim(exaMesh mesh);
 int exaMeshSetDim(exaMesh mesh,int dim);
 
-int exaMeshSetXcoords(exaMesh mesh,exaScalar *xc);
-exaScalar *exaMeshGetXcoords(exaMesh mesh);
-int exaMeshSetYcoords(exaMesh mesh,exaScalar *yc);
-exaScalar *exaMeshGetYcoords(exaMesh mesh);
-int exaMeshSetZcoords(exaMesh mesh,exaScalar *zc);
-exaScalar *exaMeshGetZcoords(exaMesh mesh);
+int exaMeshSetElemX(exaMesh mesh,exaScalar *xc);
+exaScalar *exaMeshGetElemX(exaMesh mesh);
+int exaMeshSetElemY(exaMesh mesh,exaScalar *yc);
+exaScalar *exaMeshGetElemY(exaMesh mesh);
+int exaMeshSetElemZ(exaMesh mesh,exaScalar *zc);
+exaScalar *exaMeshGetElemZ(exaMesh mesh);
+
+int exaMeshSetMeshX(exaMesh mesh,exaScalar *xc);
+exaScalar *exaMeshGetMeshX(exaMesh mesh);
+int exaMeshSetMeshY(exaMesh mesh,exaScalar *yc);
+exaScalar *exaMeshGetMeshY(exaMesh mesh);
+int exaMeshSetMeshZ(exaMesh mesh,exaScalar *zc);
+exaScalar *exaMeshGetMeshZ(exaMesh mesh);
 
 int exaMeshSetGlobalNumbering(exaMesh mesh,exaLong *gloNum);
 exaLong *exaMeshGetGlobalNumbering(exaMesh mesh);
