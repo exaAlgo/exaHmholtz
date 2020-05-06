@@ -39,9 +39,12 @@ int main(int argc,char *argv[])
   exaMeshSetNElements(mesh,1);
   exaMeshSet1DDofs(mesh,2);
 
-  exaMeshSetXcoords(mesh,x);
-  exaMeshSetYcoords(mesh,y);
-  exaMeshSetZcoords(mesh,z);
+  exaMeshSetMeshX(mesh,x);
+  exaMeshSetMeshY(mesh,y);
+  exaMeshSetMeshZ(mesh,z);
+  exaMeshSetElemX(mesh,x);
+  exaMeshSetElemY(mesh,y);
+  exaMeshSetElemZ(mesh,z);
 
   exaMeshSetGlobalIds(mesh,globalIds);
 
@@ -56,9 +59,13 @@ int main(int argc,char *argv[])
   if(exaMeshGet1DDofs(mesh)!=2)
     fprintf(stderr,"exaMeshGet1DDofs failed.\n");
 
-  if(exaMeshGetXcoords(mesh)!=x || exaMeshGetYcoords(mesh)!=y
-    || exaMeshGetZcoords(mesh)!=z)
-    fprintf(stderr,"exaMeshGet(X,Y,Z)coords failed.\n");
+  if(exaMeshGetElemX(mesh)!=x || exaMeshGetElemY(mesh)!=y
+    || exaMeshGetElemZ(mesh)!=z)
+    fprintf(stderr,"exaMeshGetElem{X,Y,Z} failed.\n");
+
+  if(exaMeshGetMeshX(mesh)!=x || exaMeshGetMeshY(mesh)!=y
+    || exaMeshGetMeshZ(mesh)!=z)
+    fprintf(stderr,"exaMeshGetMesh{X,Y,Z} failed.\n");
 
   if(exaMeshGetGlobalIds(mesh)!=globalIds)
     fprintf(stderr,"exaMeshGetGlobalIds failed.\n");
