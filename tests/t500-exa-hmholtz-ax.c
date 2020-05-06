@@ -16,13 +16,27 @@ int main(int argc,char *argv[])
   exaInit(&h,MPI_COMM_WORLD,argv[1]);
 
   exaSettings s; exaSettingsCreate(h,NULL,&s);
-  exaSettingsSet("general::order",getExaInt(7),s);
+  exaSettingsSet("general::order",getExaInt(1),s);
 
   exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
   exaMeshSetNElements(mesh,2);
   exaMeshSetDim(mesh,3);
 
-  // TODO: Initialize the mesh
+  exaScalar xc[16]={-1.0,0.0,-1.0,0.0,-1.0,0.0,-1.0,0.0,
+                     0.0,1.0, 0.0,1.0, 0.0,1.0, 0.0,1.0};
+  exaScalar yc[16]={-1.0,-1.0,0.0,0.0,-1.0,-1.0,0.0,0.0,
+                     0.0, 0.0,1.0,1.0, 0.0, 0.0,1.0,1.0};
+  exaScalar zc[16]={-1.0,-1.0,-1.0,-1.0,0.0,0.0,0.0,0.0,
+                     0.0, 0.0, 0.0, 0.0,1.0,1.0,1.0,1.0};
+  exaMeshSetElemX(mesh,xc);
+  exaMeshSetElemY(mesh,yc);
+  exaMeshSetElemZ(mesh,zc);
+  exaMeshSetMeshX(mesh,xc);
+  exaMeshSetMeshY(mesh,yc);
+  exaMeshSetMeshZ(mesh,zc);
+
+  //TODO: Initialize mask,geom. factors, D and globalNumbering
+
   exaMeshSetup(mesh,s);
 
   exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
