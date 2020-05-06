@@ -13,7 +13,7 @@ int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
     mesh->xm1=mesh->ym1=mesh->zm1=NULL;
     mesh->xc =mesh->yc =mesh->zc =NULL;
 
-    mesh->gloNum=NULL;
+    mesh->globalIds=NULL;
 
     mesh->mask=NULL;
     mesh->geom=NULL;
@@ -46,7 +46,7 @@ int exaMeshInitialized(exaMesh mesh){
     initialized=0;
   if(mesh->mask==NULL||mesh->geom==NULL||mesh->D==NULL)
     initialized=0;
-  if(mesh->gloNum==NULL)
+  if(mesh->globalIds==NULL)
     initialized=0;
 
   exaDebug(h,"[/meshInitialized]\n");
@@ -210,22 +210,22 @@ exaScalar *exaMeshGetMeshZ(exaMesh mesh){
   return mesh->zm1;
 }
 
-int exaMeshSetGlobalNumbering(exaMesh mesh,exaLong *gloNum){
+int exaMeshSetGlobalIds(exaMesh mesh,exaLong *globalIds){
   exaHandle h; exaMeshGetHandle(mesh,&h);
   if(exaRank(h)==0)
-    exaDebug(h,"[exaMeshSetGlobalNumbering] %s:%d glo_num=%p\n",
-      __FILE__, __LINE__,gloNum);
+    exaDebug(h,"[exaMeshSetGlobalIds] %s:%d glo_num=%p\n",
+      __FILE__, __LINE__,globalIds);
 
   //should this be a copy?
-  mesh->gloNum=gloNum;
+  mesh->globalIds=globalIds;
 
   if(exaRank(h)==0)
-    exaDebug(h,"[exaMeshSetGlobalNumbering]\n");
+    exaDebug(h,"[exaMeshSetGlobalIds]\n");
 
   return 0;
 }
-exaLong *exaMeshGetGlobalNumbering(exaMesh mesh){
-  return mesh->gloNum;
+exaLong *exaMeshGetGlobalIds(exaMesh mesh){
+  return mesh->globalIds;
 }
 
 int exaMeshSetMask(exaMesh mesh,exaScalar *mask){
@@ -285,7 +285,7 @@ static int gatherScatterSetup(exaMesh mesh){
   exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
 
   /* setup gather scatter */
-  exaGSSetup(mesh->gloNum,totalDofs,exaGetComm(h),0,0,&mesh->gs);
+  exaGSSetup(mesh->globalIds,totalDofs,exaGetComm(h),0,0,&mesh->gs);
   exaBufferCreate(&mesh->buf,1024);
 
   /*TODO: setup global offsets and ids */

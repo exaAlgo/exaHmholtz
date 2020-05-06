@@ -146,13 +146,12 @@ void fExaMeshSetMeshZ(exaFortranMesh *mesh,exaScalar *zc,int *err){
   *err=exaMeshSetMeshZ(exaMeshF2C(*mesh),zc);
 }
 
-#define fExaMeshSetGlobalNumbering\
-  EXA_FORTRAN_NAME(exameshsetglobalnumbering,\
-  EXAMESHSETGLOBALNUMBERING)
-void fExaMeshSetGlobalNumbering(exaFortranMesh *mesh,exaLong *gloNum,
+#define fExaMeshSetGlobalIds\
+  EXA_FORTRAN_NAME(exameshsetglobalids,EXAMESHSETGLOBALIDS)
+void fExaMeshSetGlobalIds(exaFortranMesh *mesh,exaLong *globalIds,
   int *err)
 {
-  *err=exaMeshSetGlobalNumbering(exaMeshF2C(*mesh),gloNum);
+  *err=exaMeshSetGlobalIds(exaMeshF2C(*mesh),globalIds);
 }
 
 #define fExaMeshSetMask\

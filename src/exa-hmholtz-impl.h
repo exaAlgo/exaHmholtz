@@ -42,7 +42,7 @@ struct exaMesh_private{
   exaScalar *xm1,*ym1,*zm1;
 
   /* global numbering of dofs */
-  exaLong *gloNum;
+  exaLong *globalIds;
   exaVector d_globalStart;
   exaVector d_globalIds;
 

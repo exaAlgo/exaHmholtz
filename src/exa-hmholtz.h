@@ -46,8 +46,8 @@ exaScalar *exaMeshGetMeshY(exaMesh mesh);
 int exaMeshSetMeshZ(exaMesh mesh,exaScalar *zc);
 exaScalar *exaMeshGetMeshZ(exaMesh mesh);
 
-int exaMeshSetGlobalNumbering(exaMesh mesh,exaLong *gloNum);
-exaLong *exaMeshGetGlobalNumbering(exaMesh mesh);
+int exaMeshSetGlobalIds(exaMesh mesh,exaLong *globalIds);
+exaLong *exaMeshGetGlobalIds(exaMesh mesh);
 
 int exaMeshSetMask(exaMesh mesh,exaScalar *mask);
 exaScalar *exaMeshGetMask(exaMesh mesh);

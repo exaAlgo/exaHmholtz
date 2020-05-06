@@ -13,7 +13,7 @@ exaScalar z[8]={-1.0,-1.0,
                  1.0, 1.0,
                  1.0, 1.0};
 
-exaLong gloNum[8]={1,2,3,4,5,6,7,8};
+exaLong globalIds[8]={1,2,3,4,5,6,7,8};
 
 exaScalar geom[8*6]={0};
 exaScalar mask[8]={0};
@@ -43,7 +43,7 @@ int main(int argc,char *argv[])
   exaMeshSetYcoords(mesh,y);
   exaMeshSetZcoords(mesh,z);
 
-  exaMeshSetGlobalNumbering(mesh,gloNum);
+  exaMeshSetGlobalIds(mesh,globalIds);
 
   exaMeshSetGeometricFactors(mesh,geom);
   exaMeshSetMask(mesh,mask);
@@ -60,8 +60,8 @@ int main(int argc,char *argv[])
     || exaMeshGetZcoords(mesh)!=z)
     fprintf(stderr,"exaMeshGet(X,Y,Z)coords failed.\n");
 
-  if(exaMeshGetGlobalNumbering(mesh)!=gloNum)
-    fprintf(stderr,"exaMeshGetGlobalNumbering failed.\n");
+  if(exaMeshGetGlobalIds(mesh)!=globalIds)
+    fprintf(stderr,"exaMeshGetGlobalIds failed.\n");
 
   if(exaMeshGetGeometricFactors(mesh)!=geom)
     fprintf(stderr,"exaMeshGetGeometricFactors failed.\n");
