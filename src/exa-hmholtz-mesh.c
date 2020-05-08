@@ -269,9 +269,9 @@ int exaMeshGetDofsPerElement(exaMesh mesh){
   return (mesh->ndim==2) ? dofs*dofs : dofs*dofs*dofs;
 }
 
-int exaMeshGetLocalDofs(exaMesh mesh){
-  exaInt nelt=mesh->nelt;
-  return nelt*exaMeshGetDofsPerElement(mesh);
+exaUInt exaMeshGetLocalDofs(exaMesh mesh){
+  int nelt=mesh->nelt;
+  return (exaUInt) (nelt*exaMeshGetDofsPerElement(mesh));
 }
 
 int exaMeshGetNGeom(exaMesh mesh){
@@ -283,6 +283,8 @@ static int gatherScatterSetup(exaMesh mesh){
   exaHandle h; exaMeshGetHandle(mesh,&h);
 
   exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
+  exaDebug(h,"totalDofs=%u %d\n",totalDofs,
+    exaMeshGetDofsPerElement(mesh));
 
   /* setup gather scatter */
   exaGSSetup(mesh->globalIds,totalDofs,exaGetComm(h),0,0,&mesh->gs);
@@ -314,7 +316,7 @@ typedef struct{
 static int copyDataToDevice(exaMesh mesh){
   exaHandle h; exaMeshGetHandle(mesh,&h);
 
-  int nelt=exaMeshGetNElements(mesh);
+  exaInt nelt=exaMeshGetNElements(mesh);
   int ndim=exaMeshGetDim(mesh);
   int nx1 =exaMeshGet1DDofs(mesh);
   int ngeom=exaMeshGetNGeom(mesh);
@@ -340,21 +342,19 @@ static int copyDataToDevice(exaMesh mesh){
   /* setup mask */
   maskID id;
   exaArrayInit(&mesh->maskIds,maskID,10);
-  exaDebug(h,"Masked ids: ");
-
   exaUInt i;
-  for(i=0;i<totalDofs;i++)
+  for(i=0;i<totalDofs;i++){
     if(fabs(mesh->mask[i])<EXA_TOL){
       exaDebug(h,"%d ",i);
       id.id=i;
       exaArrayAppend(mesh->maskIds,&id);
     }
-  exaDebug(h,"\n");
+  }
 
   exaUInt size=exaArrayGetSize(mesh->maskIds);
+  maskID *ptr=exaArrayGetPointer(mesh->maskIds);
 
   exaInt *ids; exaCalloc(size,&ids);
-  maskID *ptr=exaArrayGetPointer(mesh->maskIds);
   exaDebug(h,"Masked ids: ");
   for(i=0;i<size;i++){
     ids[i]=ptr[i].id;
@@ -397,10 +397,12 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
 
   assert(exaMeshInitialized(mesh)!=0);
 
-  exaUInt nx1=exaMeshGet1DDofs(mesh);
-  exaUInt ndim=exaMeshGetDim(mesh);
-  exaUInt ngeom=exaMeshGetNGeom(mesh);
-  exaUInt elemDofs=exaMeshGetDofsPerElement(mesh);
+  int nx1; exaSettingsGet(&nx1,"general::order",s); nx1++;
+ 
+  exaMeshSet1DDofs(mesh,nx1);
+  int ndim=exaMeshGetDim(mesh);
+  int ngeom=exaMeshGetNGeom(mesh);
+  int elemDofs=exaMeshGetDofsPerElement(mesh);
 
   exaSettingsSet("defines::p_Nq"   ,getExaUInt(nx1     ),s);
   exaSettingsSet("defines::p_Np"   ,getExaUInt(elemDofs),s);

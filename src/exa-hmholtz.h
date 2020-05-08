@@ -59,7 +59,7 @@ int exaMeshSetDerivativeMatrix(exaMesh mesh,exaScalar *D);
 exaScalar *exaMeshGetDerivativeMatrix(exaMesh mesh);
 
 int exaMeshGetDofsPerElement(exaMesh mesh);
-int exaMeshGetLocalDofs(exaMesh mesh);
+exaUInt exaMeshGetLocalDofs(exaMesh mesh);
 int exaMeshGetNGeom(exaMesh mesh);
 
 int exaMeshSetup(exaMesh mesh,exaSettings s);
