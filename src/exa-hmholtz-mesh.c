@@ -397,9 +397,14 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
 
   assert(exaMeshInitialized(mesh)!=0);
 
-  int nx1; exaSettingsGet(&nx1,"general::order",s); nx1++;
- 
+  int nx1,err;
+  err=exaSettingsGet(&nx1,"general::order",s);
+  if(err){
+    if(exaRank(h)==0) exaDebug(h,"Can't find general::order\n");
+    exit(1);
+  }
   exaMeshSet1DDofs(mesh,nx1);
+
   int ndim=exaMeshGetDim(mesh);
   int ngeom=exaMeshGetNGeom(mesh);
   int elemDofs=exaMeshGetDofsPerElement(mesh);
