@@ -18,6 +18,10 @@ int main(int argc,char *argv[])
   exaSettings s; exaSettingsCreate(h,NULL,&s);
   exaSettingsSet("general::order",getExaUInt(1),s);
 
+  /* Create helmholtz solver */
+  exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
+  exaHmholtzSetup(hmhz,s);
+
   /* Create a hex mesh of 2x1x1 */
   exaMesh mesh; exaMeshCreate(&mesh,NULL,h);
   exaMeshSetNElements(mesh,2);
@@ -57,10 +61,6 @@ int main(int argc,char *argv[])
   exaMeshSetGeometricFactors(mesh,geom);
 
   exaMeshSetup(mesh,s);
-
-  /* Create helmholtz solver */
-  exaHmholtz hmhz; exaHmholtzCreate(&hmhz,h);
-  exaHmholtzSetup(hmhz,s);
 
   // create x with zero initial guess and rhs with sin function
   exaVector x,b; exaUInt size=exaMeshGetLocalDofs(mesh);
