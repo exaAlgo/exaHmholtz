@@ -87,11 +87,9 @@ int main(int argc,char *argv[])
   exaHmholtzCG(x,b,mesh,1e-8,1000,1,hmhz);
 
   exaScalar *out; exaVectorRead(x,(void**)&out);
-#if 0
   for(i=0;i<size;i++)
     if(fabs(sol[i]-out[i])>1e-7)
       fprintf(stderr,"error: %lf != %lf\n",sol[i],out[i]);
-#endif
 
   exaFree(in); exaFree(sol);
 

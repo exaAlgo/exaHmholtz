@@ -24,9 +24,18 @@ int exaMeshCreate(exaMesh *mesh_,const char *meshFile,exaHandle h){
       " implemented yet.");
   }
 
+  exaMeshSetHandle(mesh,&h);
+
+  mesh->d_maskIds=NULL;
+  mesh->maskIds  =NULL;
+  mesh->d_rmult  =NULL;
+  mesh->d_geom   =NULL;
+  mesh->d_D      =NULL;
+
   mesh->hmholtzAx=NULL;
 
-  exaMeshSetHandle(mesh,&h);
+  mesh->buf=NULL;
+  mesh->gs =NULL;
 
   exaDebug(h,"[/meshCreate]\n");
   return 0;
@@ -450,24 +459,21 @@ int exaMeshSetup(exaMesh mesh,exaSettings s){
 int exaMeshDestroy(exaMesh mesh){
   exaHandle h; exaMeshGetHandle(mesh,&h);
   exaDebug(h,"[meshDestroy]\n");
-#if 0
-  exaDestroy(mesh->d_maskIds);
-  exaDestroy(mesh->maskIds);
 
-  exaDestroy(mesh->d_rmult);
-  exaFree(mesh->rmult);
+  if(mesh->d_maskIds) exaDestroy(mesh->d_maskIds);
+  if(mesh->maskIds  ) exaDestroy(mesh->maskIds  );
+  if(mesh->d_rmult  ) exaDestroy(mesh->d_rmult  );
+  if(mesh->d_geom   ) exaDestroy(mesh->d_geom   );
+  if(mesh->d_D      ) exaDestroy(mesh->d_D      );
 
-  exaBufferFree(mesh->buf);
-  exaGSFree(mesh->gs);
+  if(mesh->hmholtzAx) exaDestroy(mesh->hmholtzAx);
 
-  exaFree(mesh->geom);
-  exaDestroy(mesh->d_geom);
+  if(mesh->buf) exaDestroy(mesh->buf);
+  if(mesh->gs ) exaGSFree (mesh->gs );
 
-  exaDestroy(mesh->d_D);
-#endif
-  exaDestroy(mesh->hmholtzAx);
+  if(mesh) exaFree(mesh);
 
-  exaFree(mesh);
+  exaDebug(h,"[/meshDestroy]\n");
 
   return 0;
 }
