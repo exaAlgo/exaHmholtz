@@ -239,10 +239,15 @@ exaLong *exaMeshGetGlobalIds(exaMesh mesh){
 
 int exaMeshSetMask(exaMesh mesh,exaScalar *mask){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetMask] %s:%d rmask=%p\n", __FILE__,
-    __LINE__,mask);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetMask] %s:%d rmask=%p\n", __FILE__,
+      __LINE__,mask);
 
   mesh->mask=mask;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetMask]\n");
+
   return 0;
 }
 exaScalar *exaMeshGetMask(exaMesh mesh){
@@ -251,10 +256,15 @@ exaScalar *exaMeshGetMask(exaMesh mesh){
 
 int exaMeshSetGeometricFactors(exaMesh mesh,exaScalar *geom){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetGeometricFactors] %s:%d geom=%p\n",
-    __FILE__,__LINE__,geom);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetGeometricFactors] %s:%d geom=%p\n",
+      __FILE__,__LINE__,geom);
 
   mesh->geom=geom;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[/exaMeshSetGeometricFactors]\n");
+
   return 0;
 }
 exaScalar *exaMeshGetGeometricFactors(exaMesh mesh){
@@ -263,10 +273,15 @@ exaScalar *exaMeshGetGeometricFactors(exaMesh mesh){
 
 int exaMeshSetDerivativeMatrix(exaMesh mesh,exaScalar *D){
   exaHandle h; exaMeshGetHandle(mesh,&h);
-  exaDebug(h,"[exaMeshSetDerivativeMatrix] %s:%d dxm1=%p\n",
-    __FILE__,__LINE__,D);
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetDerivativeMatrix] %s:%d dxm1=%p\n",
+      __FILE__,__LINE__,D);
 
   mesh->D=D;
+
+  if(exaRank(h)==0)
+    exaDebug(h,"[exaMeshSetDerivativeMatrix]\n");
+
   return 0;
 }
 exaScalar *exaMeshGetDerivativeMatrix(exaMesh mesh){
@@ -332,17 +347,13 @@ static int copyDataToDevice(exaMesh mesh){
 
   exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
 
-  /* copy geometric factors and derivative matrix */
-  exaVectorCreate(h,totalDofs*ngeom,exaScalar_t,&mesh->d_geom);
+  /* copy geometric factors */
+  exaVectorCreate(h,totalDofs*(ngeom+1),exaScalar_t,&mesh->d_geom);
   exaVectorWrite(mesh->d_geom,mesh->geom);
 
+  /* copy derivative matrix */
   exaVectorCreate(h,nx1*nx1,exaScalar_t,&mesh->d_D);
-  exaScalar *D; exaCalloc(nx1*nx1,&D);
-  for(int i=0;i<nx1;i++)
-    for(int j=0;j<nx1;j++)
-    D[i*nx1+j]=mesh->D[j*nx1+i];
-  exaVectorWrite(mesh->d_D,D);
-  exaFree(D);
+  exaVectorWrite(mesh->d_D,mesh->D);
 
   /* copy multiplicities to device */
   exaVectorCreate(h,totalDofs,exaScalar_t,&mesh->d_rmult);
@@ -359,6 +370,7 @@ static int copyDataToDevice(exaMesh mesh){
       exaArrayAppend(mesh->maskIds,&id);
     }
   }
+  exaDestroy(mesh->maskIds);
 
   exaUInt size=exaArrayGetSize(mesh->maskIds);
   maskID *ptr=exaArrayGetPointer(mesh->maskIds);
@@ -461,7 +473,6 @@ int exaMeshDestroy(exaMesh mesh){
   exaDebug(h,"[meshDestroy]\n");
 
   if(mesh->d_maskIds) exaDestroy(mesh->d_maskIds);
-  if(mesh->maskIds  ) exaDestroy(mesh->maskIds  );
   if(mesh->d_rmult  ) exaDestroy(mesh->d_rmult  );
   if(mesh->d_geom   ) exaDestroy(mesh->d_geom   );
   if(mesh->d_D      ) exaDestroy(mesh->d_D      );
