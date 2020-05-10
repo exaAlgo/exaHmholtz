@@ -305,12 +305,19 @@ int exaMeshGetNGeom(exaMesh mesh){
 
 static int gatherScatterSetup(exaMesh mesh){
   exaHandle h; exaMeshGetHandle(mesh,&h);
+  if(exaRank(h)==0) exaDebug(h,"[gatherScatterSetup]\n");
 
   exaUInt totalDofs=exaMeshGetLocalDofs(mesh);
   exaDebug(h,"totalDofs=%u %d\n",totalDofs,
     exaMeshGetDofsPerElement(mesh));
 
   /* setup gather scatter */
+  exaDebug(h,"globalIds: ");
+  for(int i=0;i<totalDofs;i++){
+    exaDebug(h,"%lld ",mesh->globalIds[i]);
+  }
+  exaDebug(h,"\n");
+
   exaGSSetup(mesh->globalIds,totalDofs,exaGetComm(h),0,0,&mesh->gs);
   exaBufferCreate(&mesh->buf,1024);
 
@@ -324,11 +331,14 @@ static int gatherScatterSetup(exaMesh mesh){
 
   exaGSOp(mesh->rmult,exaScalar_t,exaAddOp,0,mesh->gs,mesh->buf);
 
+  exaDebug(h,"rmult: ");
   for(i=0;i<totalDofs;i++){
     mesh->rmult[i]=1.0/mesh->rmult[i];
     exaDebug(h,"%lf ",mesh->rmult[i]);
   }
   exaDebug(h,"\n");
+
+  if(exaRank(h)==0) exaDebug(h,"[gatherScatterSetup]\n");
 
   return 0;
 }
@@ -385,6 +395,7 @@ static int copyDataToDevice(exaMesh mesh){
 
   exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
   exaVectorWrite(mesh->d_maskIds,ids);
+
   exaDestroy(mesh->maskIds);
   exaFree(ids);
 
