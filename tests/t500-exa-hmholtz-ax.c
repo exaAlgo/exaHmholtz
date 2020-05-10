@@ -84,7 +84,7 @@ int main(int argc,char *argv[])
   exaApplyMask(b,mesh->d_maskIds,hmhz);
   //TODO: dssum
 
-  exaHmholtzCG(x,b,mesh,1e-8,1000,1,hmhz);
+  exaHmholtzCG(x,b,mesh,1e-8,1000,0,hmhz);
 
   exaScalar *out; exaVectorRead(x,(void**)&out);
   for(i=0;i<size;i++)
