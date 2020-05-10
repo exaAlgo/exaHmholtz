@@ -4,42 +4,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-static exaHmholtz *hmholtzDict=NULL;
-static int hmholtzCurrent=0;
-static int hmholtzActive=0;
-static int hmholtzMax=0;
-
-#define fExaHmholtzCreate\
-  EXA_FORTRAN_NAME(exahmholtzcreate,EXAHMHOLTZCREATE)
-void fExaHmholtzCreate(exaFortranHmholtz *hmhz,
-  exaFortranHandle *h,int *err)
-{
-  if(hmholtzCurrent==hmholtzMax)
-    hmholtzMax+=hmholtzMax/2+1,exaRealloc(hmholtzMax,&hmholtzDict);
-
-  *err=exaHmholtzCreate(&hmholtzDict[hmholtzCurrent],
-    exaHandleF2C(*h));
-
-  if(*err==0)
-    *hmhz=hmholtzCurrent++,hmholtzActive++;
-}
-
-#define fExaHmholtzDestroy\
-  EXA_FORTRAN_NAME(exahmholtzdestroy,EXAHMHOLTZDESTROY)
-void fExaHmholtzDestroy(exaFortranHmholtz *hmhz,int *err){
-  *err=exaHmholtzDestroy(exaHmholtzF2C(*hmhz));
-
-  if(*err==0){
-    hmholtzActive--;
-    if(hmholtzActive==0)
-      exaFree(hmholtzDict),hmholtzCurrent=0,hmholtzMax=0;
-  }
-}
-
+/* Fortran interface for exaMesh */
 static exaMesh *meshDict=NULL;
 static int meshCurrent=0;
 static int meshActive=0;
 static int meshMax=0;
+
+exaMesh exaMeshF2C(exaFortranMesh mesh){
+  if(mesh<0||mesh>=meshCurrent||meshActive<=0){
+    fprintf(stderr,"Invalid exaFortranMesh.");
+    return NULL;
+  }
+  return meshDict[mesh];
+}
 
 #define fExaMeshCreate\
   EXA_FORTRAN_NAME(exameshcreate,EXAMESHCREATE)
@@ -214,6 +191,48 @@ void fExaMeshDestroy(exaFortranMesh *mesh,int *err){
   }
 }
 
+/* Fortran interface for exaHmholtz */
+
+static exaHmholtz *hmholtzDict=NULL;
+static int hmholtzCurrent=0;
+static int hmholtzActive=0;
+static int hmholtzMax=0;
+
+exaHmholtz exaHmholtzF2C(exaFortranHmholtz hmholtz){
+  if(hmholtz<0||hmholtz>=hmholtzCurrent||hmholtzActive<=0){
+    fprintf(stderr,"Invalid exaFortranHmholtz.");
+    return NULL;
+  }
+  return hmholtzDict[hmholtz];
+}
+
+#define fExaHmholtzCreate\
+  EXA_FORTRAN_NAME(exahmholtzcreate,EXAHMHOLTZCREATE)
+void fExaHmholtzCreate(exaFortranHmholtz *hmhz,
+  exaFortranHandle *h,int *err)
+{
+  if(hmholtzCurrent==hmholtzMax)
+    hmholtzMax+=hmholtzMax/2+1,exaRealloc(hmholtzMax,&hmholtzDict);
+
+  *err=exaHmholtzCreate(&hmholtzDict[hmholtzCurrent],
+    exaHandleF2C(*h));
+
+  if(*err==0)
+    *hmhz=hmholtzCurrent++,hmholtzActive++;
+}
+
+#define fExaHmholtzDestroy\
+  EXA_FORTRAN_NAME(exahmholtzdestroy,EXAHMHOLTZDESTROY)
+void fExaHmholtzDestroy(exaFortranHmholtz *hmhz,int *err){
+  *err=exaHmholtzDestroy(exaHmholtzF2C(*hmhz));
+
+  if(*err==0){
+    hmholtzActive--;
+    if(hmholtzActive==0)
+      exaFree(hmholtzDict),hmholtzCurrent=0,hmholtzMax=0;
+  }
+}
+
 #define fExaHmholtzSetup\
   EXA_FORTRAN_NAME(exahmholtzsetup,EXAHMHOLTZSETUP)
 void fExaHmholtzSetup(exaFortranHmholtz *hmhz,
@@ -222,18 +241,16 @@ void fExaHmholtzSetup(exaFortranHmholtz *hmhz,
   *err=exaHmholtzSetup(exaHmholtzF2C(*hmhz),exaSettingsF2C(*s));
 }
 
-exaMesh exaMeshF2C(exaFortranMesh mesh){
-  if(mesh<0||mesh>=meshCurrent||meshActive<=0){
-    fprintf(stderr,"Invalid exaFortranMesh.");
-    return NULL;
-  }
-  return meshDict[mesh];
-}
+#define fExaHmholtzCG EXA_FORTRAN_NAME(exahmholtzcg,EXAHMHOLTZCG)
+void fExaHmholtzCG(exaFortranHmholtz *fhz,exaFortranVector *fx,
+  exaFortranVector *fb,exaFortranMesh *fmesh,double *tol,int *maxit,
+  int *verbose,int *err)
+{
+  exaHmholtz hz=exaHmholtzF2C(*fhz);
+  exaMesh mesh=exaMeshF2C(*fmesh);
+  exaVector x=exaVectorF2C(*fx);
+  exaVector b=exaVectorF2C(*fb);
 
-exaHmholtz exaHmholtzF2C(exaFortranHmholtz hmholtz){
-  if(hmholtz<0||hmholtz>=hmholtzCurrent||hmholtzActive<=0){
-    fprintf(stderr,"Invalid exaFortranHmholtz.");
-    return NULL;
-  }
-  return hmholtzDict[hmholtz];
+  *maxit=exaHmholtzCG(x,b,mesh,*tol,*maxit,*verbose,hz);
+  *err=0;
 }
