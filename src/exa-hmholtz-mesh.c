@@ -370,8 +370,8 @@ static int copyDataToDevice(exaMesh mesh){
       exaArrayAppend(mesh->maskIds,&id);
     }
   }
-  exaDestroy(mesh->maskIds);
 
+  /* copy masks to device */
   exaUInt size=exaArrayGetSize(mesh->maskIds);
   maskID *ptr=exaArrayGetPointer(mesh->maskIds);
 
@@ -383,9 +383,9 @@ static int copyDataToDevice(exaMesh mesh){
   }
   exaDebug(h,"\n");
 
-  /* copy masks to device */
   exaVectorCreate(h,size,exaInt_t,&mesh->d_maskIds);
   exaVectorWrite(mesh->d_maskIds,ids);
+  exaDestroy(mesh->maskIds);
   exaFree(ids);
 
   return 0;
