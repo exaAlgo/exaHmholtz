@@ -51,7 +51,7 @@
       for(int i=0;i<p_Nq;++i;@inner(0)){
         //load D into local memory
         // s_D[i][j] = d \phi_i at node j
-        s_D[j][i] = D[p_Nq*j+i]; // D is column major
+        s_D[i][j] = D[p_Nq*j+i]; // D is column major
 
         // load pencil of u into register
         const exaUInt base = i + j*p_Nq + e*p_Np;
