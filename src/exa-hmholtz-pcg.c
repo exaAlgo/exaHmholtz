@@ -6,6 +6,7 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
   exaInt size=exaVectorGetSize(x);
   assert(size==exaVectorGetSize(b));
   exaScalar *out; exaCalloc(size,&out);
+  exaVectorWrite(x,out);
 
   exaVector r =hz->tmp_1;
   exaVector p =hz->tmp_2;
@@ -18,30 +19,29 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
   exaVectorCreate(h,size,exaScalar_t,&Ap);
   exaVectorCreate(h,size,exaScalar_t,&Ax);
 
-  exaScalar normB=exaVectorWeightedNorm2(mesh->d_rmult,b,hz);
-  exaScalar rdotr=normB;
-  if(verbose)
-    printf("cg 0: %lf\n",normB);
-
-  exaScalar TOL=max(tol*tol*normB,tol*tol);
-
   exaVectorScaledAdd(1.0,b,0.0,r,hz);
   exaVectorScaledAdd(1.0,b,0.0,p,hz);
 
-  exaScalar alpha,beta,rdotr0;
+  exaScalar rdotr=exaVectorWeightedNorm2(mesh->d_rmult,r,hz);
+  if(verbose)
+    printf("cg 0: %lf\n",rdotr);
+
+  exaScalar TOL=max(tol*tol*rdotr,tol*tol);
+
+  exaScalar pAp,alpha,beta,rdotr0;
 
   int nIter=0;
   while(nIter<maxit && rdotr>TOL){
     exaHmholtzOperator(p,Ap,mesh);
+
+    pAp=exaVectorInnerProduct2(p,Ap,hz);
+    if(verbose)
+      printf("norm pAp: %lf\n",pAp);
+
     //TODO: dssum for multi-element cases
     //exaDsSum(Ap,mesh,hmhz);
-    //exaApplyMask(Ap,mesh->d_maskIds,hz);
+    exaApplyMask(Ap,mesh->d_maskIds,hz);
 
-    exaScalar norm=exaVectorInnerProduct2(p,Ap,hz);
-    if(verbose)
-      printf("norm pAp: %lf\n",norm);
-
-    exaScalar pAp=exaVectorInnerProduct2(p,Ap,hz);
     alpha=rdotr/pAp;
 
     exaVectorScaledAdd(alpha     ,p ,1.0,x,hz);
@@ -52,8 +52,8 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
     beta=rdotr/rdotr0;
 
     if(verbose)
-      printf("niter=%d r0=%.5e r1=%.2e alpha=%.5e beta=%.5e"
-        " pap=%.5e\n",nIter,rdotr0,rdotr,alpha,beta,pAp);
+      printf("niter=%d r0=%.5e r1=%.2e alpha=%.5e pap=%.5e\n",
+        nIter,rdotr0,rdotr,alpha,pAp);
 
     exaVectorScaledAdd(1.0,r,beta,p,hz);
 
