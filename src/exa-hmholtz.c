@@ -107,9 +107,14 @@ static int buildKernels(exaSettings s,exaHmholtz hmhz){
   exaKernelCreate(hmhz->p,"mask",&hmhz->mask);
   exaProgramFree(hmhz->p);
 
+  strcpy(fname+pathLength,"/gather-scatter");
+  exaDebug(h,"Hmholtz gather-scatter kernels=%s\n",fname);
+  exaProgramCreate(h,fname,s,&hmhz->p);
+  exaKernelCreate(hmhz->p,"gatherScatter",&hmhz->gatherScatter);
+  exaProgramFree(hmhz->p);
+
   return 0;
 }
-
 
 int exaHmholtzSetup(exaHmholtz hmhz,exaSettings s){
   exaHandle h; exaHmholtzGetHandle(hmhz,&h);
@@ -126,6 +131,7 @@ int exaHmholtzDestroy(exaHmholtz hmhz){
   exaHandle h; exaHmholtzGetHandle(hmhz,&h);
   exaDebug(h,"[hmholtzDestroy]\n");
 
+  exaDestroy(hmhz->gatherScatter);
   exaDestroy(hmhz->mask);
   exaDestroy(hmhz->vectorScaledAdd);
   exaDestroy(hmhz->vectorWeightedInnerProduct2);

@@ -22,6 +22,7 @@ struct exaHmholtz_private{
   exaKernel vectorInnerProduct2;
   exaKernel vectorScaledAdd;
   exaKernel mask;
+  exaKernel gatherScatter;
   // device vectors
   exaVector tmp_1,tmp_2,tmp_3,tmp_4,tmp_5;
 };
@@ -59,6 +60,7 @@ struct exaMesh_private{
 
   /* gather scatter setup */
   exaGS gs; exaBuffer buf;
+  exaGS dGs;
 
   /* inv degree of a dof */
   exaScalar *rmult;

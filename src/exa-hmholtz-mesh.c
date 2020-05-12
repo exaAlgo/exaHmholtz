@@ -338,6 +338,9 @@ static int gatherScatterSetup(exaMesh mesh){
   }
   exaDebug(h,"\n");
 
+  exaGSDeviceSetup(mesh->globalIds,totalDofs,exaGetComm(h),
+    0,0,&mesh->dGs);
+
   if(exaRank(h)==0) exaDebug(h,"[gatherScatterSetup]\n");
 
   return 0;
