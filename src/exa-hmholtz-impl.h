@@ -23,6 +23,8 @@ struct exaHmholtz_private{
   exaKernel vectorScaledAdd;
   exaKernel mask;
   exaKernel gatherScatter;
+  exaKernel gather;
+  exaKernel scatter;
   // device vectors
   exaVector tmp_1,tmp_2,tmp_3,tmp_4,tmp_5;
 };

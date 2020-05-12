@@ -9,6 +9,9 @@ int exaHmholtzCreate(exaHmholtz *solver_,exaHandle h){
   exaHmholtzSetHandle(solver,&h);
 
   solver->Ax=NULL;
+  solver->gatherScatter=NULL;
+  solver->gather=NULL;
+  solver->scatter=NULL;
   solver->vectorWeightedNorm2=NULL;
   solver->vectorWeightedInnerProduct2=NULL;
   solver->vectorInnerProduct2=NULL;
@@ -51,8 +54,7 @@ static int setupSettings(exaSettings s,exaHmholtz solver){
     const char *suffix="/local/exaHmholtz/";
     strcpy(installDir,home);
     strcpy(installDir+strlen(home),suffix);
-  } else
-    strcpy(installDir,ret);
+  }else strcpy(installDir,ret);
   exaDebug(h,"Hmholtz install dir=%s\n",installDir);
   exaSettingsSet("hmholtz::install_dir",getExaStr(installDir),s);
 
@@ -64,17 +66,6 @@ static int setupSettings(exaSettings s,exaHmholtz solver){
   strcpy(fname+strlen(installDir),kernelDir);
   exaSettingsSet("hmholtz::kernel_dir",getExaStr(fname),s);
 
-  ret=getenv("EXA_NEK5000_DIR");
-  if(ret==NULL){
-    const char *home=getenv("HOME");
-    const char *suffix="/local/nek5000/";
-    strcpy(installDir,home);
-    strcpy(installDir+strlen(home),suffix);
-  } else
-    strcpy(installDir,ret);
-  exaDebug(h,"Nek5000 install dir=%s\n",installDir);
-  exaSettingsSet("nek5000::install_dir",getExaStr(installDir),s);
-
   return 0;
 }
 
@@ -83,6 +74,7 @@ static int buildKernels(exaSettings s,exaHmholtz hmhz){
 
   const char *kernelDir;
   exaSettingsGet(&kernelDir,"hmholtz::kernel_dir",s);
+  exaDebug(h,"Hmholtz kernels dir=%s\n",kernelDir);
 
   char fname[BUFSIZ];
   strcpy(fname,kernelDir);
@@ -111,6 +103,8 @@ static int buildKernels(exaSettings s,exaHmholtz hmhz){
   exaDebug(h,"Hmholtz gather-scatter kernels=%s\n",fname);
   exaProgramCreate(h,fname,s,&hmhz->p);
   exaKernelCreate(hmhz->p,"gatherScatter",&hmhz->gatherScatter);
+  exaKernelCreate(hmhz->p,"gather",&hmhz->gather);
+  exaKernelCreate(hmhz->p,"scatter",&hmhz->scatter);
   exaProgramFree(hmhz->p);
 
   return 0;
@@ -131,7 +125,10 @@ int exaHmholtzDestroy(exaHmholtz hmhz){
   exaHandle h; exaHmholtzGetHandle(hmhz,&h);
   exaDebug(h,"[hmholtzDestroy]\n");
 
+  exaDestroy(hmhz->Ax);
   exaDestroy(hmhz->gatherScatter);
+  exaDestroy(hmhz->gather);
+  exaDestroy(hmhz->scatter);
   exaDestroy(hmhz->mask);
   exaDestroy(hmhz->vectorScaledAdd);
   exaDestroy(hmhz->vectorWeightedInnerProduct2);

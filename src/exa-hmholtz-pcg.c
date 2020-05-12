@@ -23,9 +23,6 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
   exaVectorScaledAdd(1.0,b,0.0,p,hz);
 
   exaScalar rdotr=exaVectorWeightedNorm2(mesh->d_rmult,r,hz);
-  if(verbose)
-    printf("cg 0: %lf\n",rdotr);
-
   exaScalar TOL=max(tol*tol*rdotr,tol*tol);
 
   exaScalar pAp,alpha,beta,rdotr0;
@@ -36,8 +33,7 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
 
     pAp=exaVectorInnerProduct2(p,Ap,hz);
 
-    //TODO: dssum for multi-element cases
-    //exaDsSum(Ap,mesh,hmhz);
+    exaHmholtzGatherScatter(Ap,mesh,hz);
     exaApplyMask(Ap,mesh->d_maskIds,hz);
 
     alpha=rdotr/pAp;

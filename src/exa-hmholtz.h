@@ -70,6 +70,10 @@ int exaMeshDestroy(exaMesh mesh);
 //
 int exaHmholtzOperator(exaVector p,exaVector Ap,exaMesh mesh);
 //
+// Gather Scatter
+//
+int exaHmholtzGatherScatter(exaVector in,exaMesh mesh,exaHmholtz hmhz);
+//
 // Mask
 //
 int exaApplyMask(exaVector vec,exaVector maskIds,exaHmholtz hz);
