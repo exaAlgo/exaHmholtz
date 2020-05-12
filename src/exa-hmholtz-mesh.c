@@ -495,6 +495,7 @@ int exaMeshDestroy(exaMesh mesh){
 
   if(mesh->buf) exaDestroy(mesh->buf);
   if(mesh->gs ) exaGSFree (mesh->gs );
+  if(mesh->dGs) exaGSFree (mesh->dGs);
 
   if(mesh) exaFree(mesh);
 

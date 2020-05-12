@@ -35,8 +35,6 @@ int exaHmholtzCG(exaVector x,exaVector b,exaMesh mesh,exaScalar tol,
     exaHmholtzOperator(p,Ap,mesh);
 
     pAp=exaVectorInnerProduct2(p,Ap,hz);
-    if(verbose)
-      printf("norm pAp: %lf\n",pAp);
 
     //TODO: dssum for multi-element cases
     //exaDsSum(Ap,mesh,hmhz);
