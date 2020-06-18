@@ -55,6 +55,7 @@ SOFTWARE.
 @kernel void gather(const exaUInt Ngather,
                     @restrict const exaUInt *gatherStarts,
                     @restrict const exaUInt *gatherIds,
+                    @restrict exaScalar *in,
                     @restrict exaScalar *q)
 {
   for(exaInt g=0;g<Ngather;++g;@tile(256,@outer,@inner)){
@@ -62,16 +63,14 @@ SOFTWARE.
       const exaUInt start=gatherStarts[g];
       const exaUInt end  =gatherStarts[g+1];
 
-      if((start+1)!=end){
-        exaScalar gq = 0.f;
+      exaScalar gq = 0.f;
         
-        for(exaInt n=start;n<end;++n){
-          const exaInt id = gatherIds[n];
-          gq += q[id];
-        }
-
-        q[g]=gq;
+      for(exaInt n=start;n<end;++n){
+        const exaInt id = gatherIds[n];
+        gq += in[id];
       }
+
+      q[g]=gq;
     }
   }
 }
@@ -88,11 +87,9 @@ SOFTWARE.
       const exaUInt start=scatterStarts[g];
       const exaUInt end  =scatterStarts[g+1];
 
-      if((start+1)!=end){
-        for(exaInt n=start;n<end;++n){
-          const exaInt id = scatterIds[n];
-          out[id] = gq;
-        }
+      for(exaInt n=start;n<end;++n){
+        const exaInt id = scatterIds[n];
+        out[id] = gq;
       }
     }
   }
